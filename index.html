@@ -312,6 +312,28 @@ body.intro #intro{display:block}
 #izone b{font-size:15px}
 @media (max-width:860px){#intro .brandline{display:none}#intro .tiers button{min-height:38px;padding:3px 8px}#intro select{min-height:42px;margin-top:6px}#izone{margin-top:8px;padding:8px 10px;font-size:12.5px}#intro .nav{margin-top:10px}#intro section[data-s="3"] .sub{display:none}#intro .box{left:10px;right:10px;width:auto;top:auto;bottom:max(10px,env(safe-area-inset-bottom,0px));transform:none;max-height:64dvh;padding:14px 14px 12px}}
 @media (prefers-reduced-motion:reduce){#intro .isteps i{transition:none}}
+
+/* ── Phòng: chủ phòng điều khiển nhạc, hiệu ứng, khán giả ── */
+.croom{display:none!important}
+.roombar{display:flex;align-items:center;gap:8px;justify-content:space-between;margin:2px 0 6px}
+#rbName{font:700 14px 'Be Vietnam Pro',system-ui,sans-serif}
+.plctl{display:flex;gap:6px;margin:8px 0}.plctl[hidden]{display:none}.plctl .btn{flex:1;min-height:40px}
+.pllist{list-style:none;margin:6px 0;padding:0;display:grid;gap:4px;max-height:220px;overflow:auto}
+.pllist li{display:flex;align-items:stretch;border-radius:9px;background:rgba(255,255,255,.05)}
+.pllist li.on{background:rgba(255,216,74,.16);box-shadow:inset 0 0 0 1px rgba(255,216,74,.55)}
+.pllist .pt{flex:1;min-width:0;text-align:left;border:0;background:none;color:var(--ink);padding:9px 10px;font-size:13px;line-height:1.3;min-height:40px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.pllist .px{width:40px;border:0;background:none;color:var(--dim);font-size:14px}
+.pllist button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.lockmsg{display:none;font-size:12px;color:var(--accent);margin:0 0 8px}
+body.guest .lockmsg{display:block}
+body.guest .lockable .dbody>*:not(.lockmsg){opacity:.45;pointer-events:none}
+body.guest #ytForm,body.guest #vPlay,body.guest #vSeek,body.guest #vClose{display:none!important}
+body.guest #menuBtn{margin-left:auto}
+#intro #rkSeg button{min-height:46px;font-size:14px}
+#intro #rcode{width:100%;min-height:56px;font:700 26px 'Be Vietnam Pro',system-ui,sans-serif;letter-spacing:.32em;text-transform:uppercase;text-align:center;background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:12px;color:var(--ink);outline:0;margin-top:12px;padding:8px 10px}
+#intro #rcode:focus-visible{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,216,74,.25)}
+#intro .roomnote{font-size:12.5px;color:var(--dim);margin:10px 2px 0;line-height:1.5}
+#intro .rban{font-size:13px;padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.07);margin-bottom:12px;line-height:1.45}
 </style>
 </head>
 <body>
@@ -330,10 +352,10 @@ body.intro #intro{display:block}
     <span>Mô phỏng fan-made · sơ đồ 2 đêm BIGBANG tại Mỹ Đình 24–25/10/2026</span>
   </div>
   <form class="yt" id="ytForm">
-    <input id="ytIn" placeholder="Dán link YouTube…" autocomplete="off" spellcheck="false">
+    <input id="ytIn" placeholder="Dán link YouTube để thêm vào playlist…" autocomplete="off" spellcheck="false">
     <a id="ytOpen" target="_blank" rel="noopener">Mở YouTube ↗</a>
     <label class="up" title="Chọn file video hoặc nhạc trong máy để chiếu lên màn LED"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"/></svg><span>Tải video</span><input type="file" id="vidIn" accept="video/*,audio/*" hidden></label>
-    <button>Lên sóng</button>
+    <button>Thêm</button>
   </form>
   <button id="menuBtn" aria-label="Mở bảng điều khiển"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
 </header>
@@ -349,7 +371,14 @@ body.intro #intro{display:block}
 <aside id="panel">
   <button class="phead" id="pHead"><span>Tùy chọn</span><i></i></button>
   <div class="pbody">
-  <details open><summary>Đèn sân khấu</summary><div class="dbody">
+  <details open id="plBox"><summary>Nhạc &amp; phòng</summary><div class="dbody">
+  <div class="roombar"><span id="rbName"></span><button class="btn" id="rbCopy" type="button" hidden>Sao chép link mời</button></div>
+  <div class="opt2" id="rbRole" style="margin:0 0 8px"></div>
+  <div class="plctl" id="plCtl"><button class="btn" id="plPrev" type="button" aria-label="Bài trước">⏮ Trước</button><button class="btn" id="plNext" type="button" aria-label="Bài sau">Sau ⏭</button><button class="btn" id="plClear" type="button">Xóa hết</button></div>
+  <ol class="pllist" id="plList"></ol>
+  <p class="opt2" id="plHint" style="margin:6px 0 0"></p>
+  </div></details>
+  <details open class="lockable"><summary>Đèn sân khấu</summary><div class="dbody"><p class="lockmsg">🔒 Chỉ chủ phòng điều khiển phần này.</p>
   <div class="seg" id="modeSeg">
     <button data-v="ballad">Ballad</button><button data-v="dance" class="on">Dance</button><button data-v="encore">Encore</button>
   </div>
@@ -375,7 +404,7 @@ body.intro #intro{display:block}
   <div class="seg" id="shapeSeg" style="margin-bottom:10px"><button data-v="0" class="on">Sao</button><button data-v="1">Trăng</button><button data-v="2">Tim</button><button data-v="3">Ngọc</button></div>
   <div class="sw" id="stickSw"></div>
   </div></details>
-  <details><summary>Khán giả</summary><div class="dbody">
+  <details class="lockable"><summary>Khán giả</summary><div class="dbody"><p class="lockmsg">🔒 Chỉ chủ phòng điều khiển phần này.</p>
   <div class="opt2">Số lượng</div>
   <div class="seg" id="densSeg"><button data-v="0.15">Ít</button><button data-v="0.35" class="on">Vừa</button><button data-v="1">Đông</button></div>
   <div class="opt2">Màu lightstick</div>
@@ -419,7 +448,7 @@ body.intro #intro{display:block}
 
 <div id="intro" role="dialog" aria-modal="true" aria-labelledby="iTitle"><div class="box">
   <p class="brandline">BIGBANG &lt;XX : COSMOS&gt; · Mỹ Đình</p>
-  <div class="isteps" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+  <div class="isteps" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
   <section data-s="1">
     <h2 id="iTitle">Chọn nhân vật</h2><p class="sub">Nhân vật của bạn đang xoay ngay trước mắt, chọn kiểu bạn thích.</p>
     <div class="seg" id="igenderSeg"><button data-v="m" class="on">Nam</button><button data-v="f">Nữ</button></div>
@@ -429,12 +458,24 @@ body.intro #intro{display:block}
   </section>
   <section data-s="2" hidden>
     <h2>Đặt nickname</h2><p class="sub">Tên này hiện trên đầu bạn và trong khung chat của mọi người.</p>
-    <label for="inick" class="sr" style="position:absolute;left:-9999px">Nickname</label>
+    <label for="inick" style="position:absolute;left:-9999px">Nickname</label>
     <input id="inick" maxlength="16" placeholder="Ví dụ: VIP Hà Nội" autocomplete="off" spellcheck="false" enterkeyhint="next">
     <div class="err" id="inickErr" role="alert"></div>
     <div class="row2"><button class="btn" id="inickRand" type="button">🎲 Gợi ý tên</button></div>
   </section>
   <section data-s="3" hidden>
+    <h2>Chọn phòng</h2><p class="sub">Vào phòng chung hoặc tạo phòng riêng để rủ bạn bè. Người vào phòng đầu tiên là chủ phòng: quyết định nhạc, hiệu ứng và khán giả.</p>
+    <div class="seg" id="rkSeg"><button data-v="pub" class="on" type="button">Phòng chung</button><button data-v="priv" type="button">Phòng riêng</button></div>
+    <p class="roomnote" id="rPub">Ai mở game cũng vào được phòng chung. <span id="rPubInfo"></span></p>
+    <div id="rPriv" hidden>
+      <label for="rcode" style="position:absolute;left:-9999px">Tên phòng</label>
+      <input id="rcode" maxlength="6" placeholder="TÊN PHÒNG" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="next">
+      <div class="err" id="rErr" role="alert"></div>
+      <p class="roomnote" style="margin-top:0">Tối đa 6 ký tự (chữ hoặc số). Chưa có phòng này thì bạn tự tạo và làm chủ phòng; gửi đúng tên đó cho bạn bè để họ vào cùng.</p>
+    </div>
+  </section>
+  <section data-s="4" hidden>
+    <div class="rban" id="rBanner"></div>
     <h2>Chọn khu vực</h2><p class="sub">Bấm vào một khu trên sân (đang hiện tên khu), hoặc chọn theo hạng vé bên dưới.</p>
     <div class="tiers" id="itiers"></div>
     <select id="iblock" aria-label="Chọn block"><option value="">— Hoặc chọn block cụ thể —</option></select>
@@ -719,7 +760,8 @@ const pG=new THREE.BufferGeometry();pG.setAttribute('position',new THREE.BufferA
 const pPts=new THREE.Points(pG,new THREE.PointsMaterial(Object.assign({size:26,map:glowTex,vertexColors:true,fog:false},ADD)));pPts.frustumCulled=false;scene.add(pPts);
 function burst(x,y,z,ci){for(let i=0;i<80&&parts.length<NP;i++){const a=Math.random()*TAU,b=Math.acos(2*Math.random()-1),v=90+Math.random()*230;
   parts.push({x,y,z,vx:Math.sin(b)*Math.cos(a)*v,vy:Math.cos(b)*v,vz:Math.sin(b)*Math.sin(a)*v,l:1,d:.7+Math.random()*.8,c:ci});}}
-function fireworks(){for(let i=0;i<7;i++)setTimeout(()=>burst(380+Math.random()*840,470+Math.random()*330,80+Math.random()*330,(Math.random()*PAL.length)|0),i*170);}
+function fireworks(){if(ROOM.host)ROOM.rf=(ROOM.rf|0)+1;fireworksFx();}
+function fireworksFx(){for(let i=0;i<7;i++)setTimeout(()=>burst(380+Math.random()*840,470+Math.random()*330,80+Math.random()*330,(Math.random()*PAL.length)|0),i*170);}
 // sao trời
 (()=>{const p=[];for(let i=0;i<500;i++){const a=Math.random()*TAU,b=Math.random()*1.3;p.push(800+Math.cos(a)*Math.cos(b)*7000,Math.sin(b)*7000+300,1140+Math.sin(a)*Math.cos(b)*7000);}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(p,3));scene.add(new THREE.Points(g,new THREE.PointsMaterial({color:0x8fa0d0,size:2,sizeAttenuation:false,fog:false})));})();
@@ -866,7 +908,7 @@ function startShow(){const k=hasLocal&&vid.duration>30&&isFinite(vid.duration)?v
 function stopShow(done){if(!S.show)return;if(S.show.f)SY.ignore=S.show.fs;S.show=null;S.led=null;$('showBtn').textContent='▶ Bắt đầu show';$('showBar').style.width='0';$('showInfo').textContent=done?'Show đã kết thúc. Cảm ơn bạn đã xem!':'Đã dừng show.';if(S.mode==='dark'||S.mode==='ment'||S.mode==='end')setMode('dance');}
 function tickShow(dt){const sh=S.show;if(!sh)return;sh.t+=dt;let a=0,i=0;for(;i<SHOW.length;i++){const d=SHOW[i][1]*sh.k;if(sh.t<a+d)break;a+=d;}
   if(i>=SHOW.length){stopShow(true);return;}const sg=SHOW[i],left=a+sg[1]*sh.k-sh.t;
-  if(i!==sh.i){sh.i=i;setMode(sg[2]);if(sg[2]==='encore'||sg[2]==='end')fireworks();$('showInfo').textContent=`Phần ${i+1}/${SHOW.length}: ${sg[0]}`;}
+  if(i!==sh.i){sh.i=i;setMode(sg[2]);if(sg[2]==='encore'||sg[2]==='end')fireworksFx();$('showInfo').textContent=`Phần ${i+1}/${SHOW.length}: ${sg[0]}`;}
   $('showBar').style.width=(sh.t/(SHOWLEN*sh.k)*100).toFixed(1)+'%';
   S.led=sg[2]==='dark'?{big:String(Math.ceil(left)),small:'Concert sắp bắt đầu'}:sg[2]==='ment'?{big:'GIAO LƯU',small:'Hà Nội ơi, giơ lightstick lên nào!'}:sg[2]==='end'?{big:'CẢM ƠN HÀ NỘI',small:'Hẹn gặp lại!'}:{big:sg[0].toUpperCase(),small:`Phần ${i+1}/${SHOW.length}`};}
 
@@ -938,6 +980,7 @@ function handleYt(peer,q,nk){const u=typeof q.yt==='string'?q.yt.slice(0,200):nu
   if(SY.yt.get(peer)===u)return;SY.yt.set(peer,u);
   if(!u){if(SY.ytFollow===peer){clearYT();addLine('',nk+' đã tắt video.',null,{sys:true});}return;}
   const pr=parseYT(u);if(!pr||!pr.id)return;const url='https://www.youtube.com/watch?v='+pr.id;
+  if(ytId===pr.id&&!hasLocal&&!ytBlocked){SY.ytFollow=peer;SY.hs=Number.isFinite(q.ys)?q.ys:null;SY.hc=Number.isFinite(q.yc)?q.yc:null;return;}
   const go=gest=>{$('ytIn').value=url;const ys=Number.isFinite(q.ys)?q.ys:null,yc=Number.isFinite(q.yc)?q.yc:null,st=ys!=null?Math.max(0,(NOW()-ys)/1000):(yc!=null?yc:0),act=gest===true||!!(navigator.userActivation&&navigator.userActivation.hasBeenActive);loadYT(url,ys!=null,{mute:!act,start:st});SY.ytFollow=peer;SY.hs=ys;SY.hc=yc;};
   if($('followShow').checked&&!hasLocal){go();addLine('',nk+' đang chiếu video YouTube — bạn đang xem cùng trên màn LED.',null,{sys:true});}
   else addLine('',nk+' đang chiếu một video YouTube.',null,{sys:true,btn:['▶ Xem cùng',()=>go(true)]});}
@@ -945,62 +988,121 @@ function tickFollow(dt){if(!SY.ytFollow||!ytId||ytBlocked||!$('followShow').chec
   if(!YT.muted&&S.ytState!==1&&S.ytState!==3&&SY.hs!=null&&!YT.retried&&Date.now()-(YT.t0||0)>5000){YT.retried=true;YT.muted=true;$('vUnmute').hidden=false;ytCmd('mute');ytCmd('playVideo');} // trình duyệt chặn phát có tiếng: chuyển sang tắt tiếng rồi tự phát
   if(SY.hs!=null){const tg=(NOW()-SY.hs)/1000;if(S.ytState===2||S.ytState===5||S.ytState===-1)ytCmd('playVideo');if(S.ytState===1&&tg>0&&Math.abs(YT.cur-tg)>1.5)ytCmd('seekTo',[tg,true]);}
   else if(SY.hc!=null&&S.ytState===1)ytCmd('pauseVideo');}
-function syncPeers(list){const seen=new Set();let n=0,total=0;
+function syncPeers(list){ROOM.peers=list;refreshHost();const seen=new Set();let n=0,total=0;
   for(const pr of list){if(pr.kind!=='viewer')continue;total++;if(pr.sameTab)continue;const q=pr.presence||{},nk=cleanText(q.n,16)||'Khách',col=PAL[Math.abs(q.st|0)%PAL.length];
-    try{handleChat(pr.peer,q,nk,col);handleShow(pr.peer,q,nk);handleYt(pr.peer,q,nk);}catch(e){}
+    try{handleChat(pr.peer,q,nk,col);if(pr.peer===ROOM.hostPeer){handleShow(pr.peer,q,nk);handleYt(pr.peer,q,nk);applyHost(q);}}catch(e){}
     if(!(Number.isFinite(q.x)&&Number.isFinite(q.z))||n>=24)continue;n++;seen.add(pr.peer);
     let p=peersMap.get(pr.peer);if(!p){p=mkPeer();peersMap.set(pr.peer,p);}
     p.tx=Math.max(0,Math.min(1600,q.x));p.tz=Math.max(-100,Math.min(2400,q.z));if(!p.init){p.x=p.tx;p.z=p.tz;p.init=true;}p.rot=Number.isFinite(q.r)?q.r:0;
     const lk=cleanLook(q.lk),key=JSON.stringify(lk);if(key!==p.key){p.key=key;if(p.char){p.char.armR.remove(p.stk);p.g.remove(p.char.root);}p.char=buildChar(lk,p.g);p.char.armR.add(p.stk);}
     if(nk!==p.nick){p.nick=nk;drawNick(p.c,p.t,nk);}p.bm.color.copy(PC[Math.abs(q.st|0)%PAL.length]);}
   for(const[k,p]of peersMap)if(!seen.has(k)){scene.remove(p.g);peersMap.delete(k);}
-  const el=$('ppl');el.hidden=false;el.textContent=total>1?'👥 '+total+' người đang xem':'👥 Chỉ mình bạn';}
+  const el=$('ppl');el.hidden=false;el.textContent='🏠 '+(ROOM.kind==='priv'?ROOM.code.toUpperCase():'Phòng chung')+' · '+(total>1?total+' người':'chỉ mình bạn')+(ROOM.host&&!INTRO.on?' · 👑 chủ phòng':'');try{INTRO.refresh&&INTRO.refresh();roomUI();}catch(e){}}
 function updatePeers(dt,t){for(const p of peersMap.values()){const dx=p.tx-p.x,dz=p.tz-p.z,d=Math.hypot(dx,dz);if(d>700){p.x=p.tx;p.z=p.tz;}else if(d>.5){const v=Math.min(d,Math.max(150,d*3)*dt);p.x+=dx/d*v;p.z+=dz/d*v;}
     const mv=d>2,w=mv?Math.sin(t*11)*.7:0,c=p.char;p.g.position.set(p.x,terr(p.x,p.z)+(mv?0:Math.abs(Math.sin(S.beat*Math.PI))*3),p.z);p.bub.sp.visible=S.t<p.bub.until;
     if(c){c.root.rotation.y=p.rot;c.legL.rotation.x=w;c.legR.rotation.x=-w;c.armL.rotation.x=-w;c.armR.rotation.x=Math.PI+.3;c.armR.rotation.z=Math.sin(S.beat*Math.PI)*.3;}}
   myBubble.sp.visible=S.t<myBubble.until&&cam.mode!=='fp';}
 function tickNet(dt){if(!RM||INTRO.on)return;netT+=dt;if(netT<.1&&!forceNet)return;netT=0;forceNet=false;
   const o={x:Math.round(me.x),z:Math.round(me.y),r:+me.rot.toFixed(2),zone:me.zone.label,n:S.nick.slice(0,16),lk:S.look,st:S.stick,m:CH.mine,
-    sh:S.show&&!S.show.f?{s:S.show.at,k:+S.show.k.toFixed(4)}:null,yt:null,ys:null,yc:null};
-  if(ytId&&!hasLocal&&ytUrl&&!ytBlocked&&!SY.ytFollow){o.yt=ytUrl;if(S.ytState===1||(S.ytState===3&&SY.anchor!=null)){const a=NOW()-YT.cur*1000;if(SY.anchor==null||Math.abs(a-SY.anchor)>800)SY.anchor=Math.round(a);o.ys=SY.anchor;}else{SY.anchor=null;o.yc=Math.round(YT.cur);}}
+    sh:S.show&&!S.show.f?{s:S.show.at,k:+S.show.k.toFixed(4)}:null,yt:null,ys:null,yc:null,j:ROOM.j,
+    pl:ROOM.host&&ROOM.pl.length?ROOM.pl:null,pi:ROOM.host?ROOM.pi:null,rm:ROOM.host?S.mode:null,rl:ROOM.host?(S.lightsOn?1:0):null,rd:ROOM.host?S.dens:null,rc:ROOM.host?S.crowd:null,rf:ROOM.host?(ROOM.rf|0):null};
+  if(ROOM.host&&ytId&&!hasLocal&&ytUrl&&!ytBlocked&&!SY.ytFollow){o.yt=ytUrl;if(S.ytState===1||(S.ytState===3&&SY.anchor!=null)){const a=NOW()-YT.cur*1000;if(SY.anchor==null||Math.abs(a-SY.anchor)>800)SY.anchor=Math.round(a);o.ys=SY.anchor;}else{SY.anchor=null;o.yc=Math.round(YT.cur);}}
   const j=JSON.stringify(o);
   if(j!==lastSent){lastSent=j;try{RM.presence(o).catch(()=>{});}catch(e){}}}
+
+/* ───────── Phòng: chủ phòng = người vào sớm nhất; chủ phòng điều khiển playlist, hiệu ứng, khán giả ───────── */
+const ROOM={kind:'pub',code:'',j:null,host:true,hostPeer:null,pl:[],pi:-1,rf:0,rf0:undefined,t0:0,err:0,fails:0,peers:[]};
+const PLMAX=30,setSeg=(id,v)=>[...$(id).children].forEach(c=>c.classList.toggle('on',c.dataset.v===String(v)));
+const cleanPL=a=>{a=Array.isArray(a)?a:(a&&typeof a==='object'?Object.values(a):[]);const out=[];for(const x of a.slice(0,PLMAX)){if(x&&typeof x.i==='string'&&/^[\w-]{11}$/.test(x.i))out.push({i:x.i,t:cleanText(x.t,60)||'Video'});}return out;};
+async function getTitle(id){const u='https://www.youtube.com/watch?v='+id;
+  const tryF=async url=>{const c=new AbortController(),tm=setTimeout(()=>c.abort(),4500);try{const r=await fetch(url,{signal:c.signal});if(!r.ok)return '';const j=await r.json();return cleanText(j&&j.title,60);}catch(e){return '';}finally{clearTimeout(tm);}};
+  return (await tryF('https://www.youtube.com/oembed?format=json&url='+encodeURIComponent(u)))||(await tryF('https://noembed.com/embed?url='+encodeURIComponent(u)));}
+function renderPL(){const ol=$('plList'),h=ROOM.host;ol.textContent='';
+  ROOM.pl.forEach((it,i)=>{const li=document.createElement('li');if(i===ROOM.pi)li.className='on';
+    const b=document.createElement(h?'button':'span');b.className='pt';b.textContent=(i===ROOM.pi?'▶ ':(i+1)+'. ')+it.t;if(h){b.type='button';b.onclick=()=>plPlay(i);}li.appendChild(b);
+    if(h){const x=document.createElement('button');x.type='button';x.className='px';x.textContent='✕';x.setAttribute('aria-label','Xóa khỏi playlist');x.onclick=()=>plRemove(i);li.appendChild(x);}
+    ol.appendChild(li);});
+  $('plCtl').hidden=!h||!ROOM.pl.length;
+  $('plHint').textContent=!ROOM.pl.length?(h?'Dán link YouTube vào ô phía trên để thêm bài. Bài đầu tiên tự phát, hết bài tự chuyển bài kế tiếp.':'Chủ phòng chưa thêm bài nào.'):(h?'Bấm tên bài để phát ngay. Hết bài tự chuyển bài kế tiếp và lặp lại từ đầu.':'Nhạc do chủ phòng điều khiển, máy bạn tự phát cùng.');}
+function plPlay(i){const n=ROOM.pl.length;if(!n)return;i=((i%n)+n)%n;ROOM.pi=i;const it=ROOM.pl[i];
+  SY.ytFollow=null;SY.anchor=null;ROOM.t0=performance.now();YT.dur=YT.cur=0;YT.pc=null;YT.adv=0;scr.style.display='';
+  loadYT('https://www.youtube.com/watch?v='+it.i,true,{mute:!(navigator.userActivation&&navigator.userActivation.hasBeenActive)});renderPL();forceNet=true;}
+const plNext=()=>plPlay(ROOM.pi+1),plPrev=()=>plPlay(ROOM.pi-1);
+function plAdd(raw){const p=parseYT(raw||'');
+  if(!p||!p.id){addLine('','Link chưa đúng — dán link video YouTube (youtube.com/watch?v=… hoặc youtu.be/…).',null,{sys:true});openChat();return false;}
+  if(ROOM.pl.length>=PLMAX){addLine('','Playlist đã đủ '+PLMAX+' bài.',null,{sys:true});return false;}
+  const it={i:p.id,t:'Video '+(ROOM.pl.length+1)};ROOM.pl.push(it);renderPL();forceNet=true;
+  getTitle(p.id).then(t=>{if(t){it.t=t;renderPL();forceNet=true;}});
+  if(ROOM.pi<0||(!ytId&&!hasLocal))plPlay(ROOM.pl.length-1);
+  return true;}
+function plRemove(i){if(i<0||i>=ROOM.pl.length)return;const cur=i===ROOM.pi;ROOM.pl.splice(i,1);if(i<ROOM.pi)ROOM.pi--;
+  if(cur){if(ROOM.pl.length)plPlay(Math.min(i,ROOM.pl.length-1));else{ROOM.pi=-1;if(!hasLocal)clearYT();}}renderPL();forceNet=true;}
+$('plPrev').onclick=plPrev;$('plNext').onclick=plNext;
+$('plClear').onclick=()=>{ROOM.pl=[];ROOM.pi=-1;if(!hasLocal)clearYT();renderPL();forceNet=true;};
+function tickRoom(dt){if(!ROOM.host||INTRO.on)return;const n=performance.now();
+  if(S.ytState===1&&n-ROOM.t0>6000)ROOM.fails=0;
+  if(ROOM.pi>=0&&ROOM.pl.length>1&&ROOM.fails<ROOM.pl.length&&((ROOM.err>ROOM.t0&&n-ROOM.err>1500)||(ytBlocked&&n-ROOM.t0>2500))){ROOM.fails++;ROOM.err=0;plNext();return;}
+  if(!ytId||hasLocal||ytBlocked||ROOM.pi<0||n-ROOM.t0<4000||!(YT.dur>5))return;
+  if((S.ytState===0&&YT.cur>YT.dur-3)||(YT.cur>=YT.dur-1.2&&n-(YT.adv||0)>2200)){ROOM.t0=n;plNext();}}
+// xác định chủ phòng: người vào sớm nhất (j nhỏ nhất); mọi máy tính cùng một kết quả nên không cần máy chủ
+function refreshHost(){let best=null;const cand=(j,id)=>{if(!Number.isFinite(j))return;if(!best||j<best.j||(j===best.j&&id<best.id))best={j,id};};
+  for(const pr of ROOM.peers||[])if(pr.kind==='viewer'&&!pr.sameTab)cand((pr.presence||{}).j,pr.peer);cand(ROOM.j,'~me');
+  const am=!RM||!best||best.id==='~me',hp=am?null:best.id,was=ROOM.host,hpWas=ROOM.hostPeer;ROOM.hostPeer=hp;
+  if(am!==was||hp!==hpWas){ROOM.host=am;
+    if(am&&!was){SY.ytFollow=null;SY.anchor=null;ROOM.rf=ROOM.rf0||0;}
+    if(!am){SY.yt.clear();SY.hs=SY.hc=null;ROOM.rf0=undefined;if(was)SY.ytFollow=null;}
+    document.body.classList.toggle('guest',!am&&!INTRO.on);renderPL();roomUI();
+    if(!INTRO.on&&(am!==was||(!am&&hp!==hpWas)))announceHost();}}
+function hostName(){if(ROOM.host)return S.nick.trim()||'Bạn';const pr=(ROOM.peers||[]).find(p=>p.peer===ROOM.hostPeer);return cleanText(pr&&pr.presence&&pr.presence.n,16)||'Chủ phòng';}
+function announceHost(){addLine('',ROOM.host?'Bạn là chủ phòng: bạn điều khiển nhạc, hiệu ứng và khán giả.':'Chủ phòng là '+hostName()+'. Nhạc và hiệu ứng do họ điều khiển.',null,{sys:true});}
+// khách áp dụng trạng thái do chủ phòng phát
+function applyHost(q){if(ROOM.host)return;
+  ROOM.pl=cleanPL(q.pl);ROOM.pi=Number.isFinite(q.pi)?q.pi:-1;renderPL();
+  if(typeof q.rm==='string'&&SCENES[q.rm]&&q.rm!==S.mode&&!S.show)setMode(q.rm);
+  if(q.rl!=null&&!!q.rl!==S.lightsOn)toggleLights();
+  if([.15,.35,1].includes(q.rd)&&q.rd!==S.dens){S.dens=q.rd;setSeg('densSeg',q.rd);applyDensity();if(!INTRO.on)showCard();}
+  if(typeof q.rc==='string'&&/^(gold|sync|wave|rainbow|zone|ring|text)$/.test(q.rc)&&q.rc!==S.crowd){S.crowd=q.rc;setSeg('crowdSeg',q.rc);}
+  if(Number.isFinite(q.rf)){if(ROOM.rf0===undefined)ROOM.rf0=q.rf;else if(q.rf!==ROOM.rf0){ROOM.rf0=q.rf;if(!S.show)fireworksFx();}}}
+// khách không bấm được phần hiệu ứng / khán giả (chặn cả bàn phím)
+for(const ev of['click','keydown','input','change'])document.addEventListener(ev,e=>{if(ROOM.host||INTRO.on)return;const t=e.target;if(t&&t.closest&&t.closest('.lockable .dbody')){if(ev==='keydown'&&e.key==='Tab')return;e.stopImmediatePropagation();e.preventDefault();}},true);
+$('rbCopy').onclick=async()=>{const u=location.origin+location.pathname+'#p-'+ROOM.code;try{await navigator.clipboard.writeText(u);addLine('','Đã sao chép link mời: '+u,null,{sys:true});}catch(e){addLine('','Link mời: '+u,null,{sys:true});}openChat();};
 // phòng chung của trang và phòng riêng theo mã
 function clearPeers(){for(const p of peersMap.values())scene.remove(p.g);peersMap.clear();}
-function roomUI(){$('roomInfo').textContent=connecting?'Đang kết nối…':!lobby?'Chưa kết nối được máy chủ chơi chung. Kiểm tra mạng rồi tải lại trang.':roomCode?'Đang ở phòng riêng "'+roomCode+'". Chỉ người nhập cùng mã mới thấy nhau.':'Phòng chung: mọi người đang mở trang này. Nhập mã để tách ra phòng riêng.';
-  $('roomBtn').textContent=roomCode?'Rời phòng':'Vào phòng';$('roomIn').disabled=!!roomCode;}
+function roomUI(){const nm=ROOM.kind==='priv'?ROOM.code.toUpperCase():'Phòng chung';
+  $('roomInfo').textContent=connecting?'Đang kết nối…':!lobby?'Chưa kết nối được máy chủ chơi chung — bạn đang chơi một mình.':(ROOM.kind==='priv'?'Phòng riêng "'+nm+'"':'Phòng chung')+' · Chủ phòng: '+hostName()+(ROOM.host?' (bạn)':'');
+  $('rbName').textContent=lobby?nm:'Chơi một mình';$('rbCopy').hidden=!(lobby&&ROOM.kind==='priv');
+  $('rbRole').textContent=!lobby?'Không có kết nối: bạn là chủ phòng của chính mình.':ROOM.host?'👑 Bạn là chủ phòng: toàn quyền nhạc, hiệu ứng và khán giả.':'Chủ phòng: '+hostName()+'. Nhạc và hiệu ứng do họ điều khiển.';
+  $('roomBtn').textContent='Vào phòng';}
 function attach(r){unsubs.forEach(u=>{try{u();}catch(e){}});unsubs=[];RM=r;clearPeers();lastSent='';forceNet=true;attachedAt=performance.now();
   const who=pr=>cleanText((pr.presence||{}).n,16)||'Một người';
   unsubs.push(r.onPeers(ch=>{try{syncPeers(ch.peers);if(performance.now()-attachedAt>3000){for(const pr of ch.joined)if(!pr.sameTab&&pr.kind==='viewer')addLine('',who(pr)+' vừa vào phòng.',null,{sys:true});
       for(const pr of ch.left)if(!pr.sameTab&&pr.kind==='viewer')addLine('',who(pr)+' đã rời phòng.',null,{sys:true});}}catch(e){}},()=>onRoomErr(r)));roomUI();}
 function onRoomErr(r){if(r!==RM)return;if(r!==lobby&&lobby){roomCode='';setHash('');attach(lobby);addLine('','Mất kết nối phòng riêng, đã quay về phòng chung.',null,{sys:true});return;}
   RM=null;lobby=null;clearPeers();$('ppl').hidden=true;roomUI();}
-const normCode=v=>v.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[đĐ]/g,'d').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,24);
+const normCode=v=>String(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[đĐ]/g,'d').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,6);
 function setHash(h){try{location.hash=h;}catch(e){}}
-async function joinCode(raw){const code=normCode(raw);if(!code){$('roomIn').focus();return;}
-  if(!lobby){addLine('','Chưa kết nối được nên chưa vào phòng riêng được.',null,{sys:true});return;}
-  $('roomBtn').disabled=true;try{const nr=await lobby.join('p-'+code);const old=RM;if(old&&old!==lobby){try{old.leave().catch(()=>{});}catch(e){}}
-    lobby.presence({x:null,z:null,r:null,zone:null,n:null,lk:null,st:null,m:null,sh:null,yt:null}).catch(()=>{});
-    roomCode=code;$('roomIn').value=code;attach(nr);setHash('p-'+code);addLine('','Đã vào phòng "'+code+'". Gửi mã này cho bạn bè để vào cùng.',null,{sys:true});}
-  catch(e){addLine('','Không vào được phòng ('+((e&&e.code)||'lỗi')+').',null,{sys:true});}finally{$('roomBtn').disabled=false;}}
-function leaveCode(){if(RM&&RM!==lobby){try{RM.leave().catch(()=>{});}catch(e){}}roomCode='';setHash('');if(lobby){attach(lobby);addLine('','Đã về phòng chung của trang.',null,{sys:true});}else roomUI();}
-$('roomBtn').onclick=()=>{roomCode?leaveCode():joinCode($('roomIn').value);};
-$('roomIn').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();joinCode($('roomIn').value);}});
+async function joinCode(raw){const code=normCode(raw);if(code.length<3)return false;
+  if(!lobby)return false;
+  try{const nr=await lobby.join('p-'+code);const old=RM;if(old&&old!==lobby){try{old.leave().catch(()=>{});}catch(e){}}
+    roomCode=code;ROOM.kind='priv';ROOM.code=code;attach(nr);setHash('p-'+code);return true;}
+  catch(e){return false;}}
+
+
 $('cform').addEventListener('submit',e=>{e.preventDefault();if(sendChat($('cin').value)){$('cin').value='';$('cin').blur();}});
 $('cin').addEventListener('keydown',e=>{if(e.key==='Escape')$('cin').blur();});
 $('chatHead').onclick=()=>{$('chat').classList.contains('min')?openChat():$('chat').classList.add('min');};
 if(COARSE||innerWidth<860)$('chat').classList.add('min');
 roomUI();
-(async()=>{try{if(!window.claude||typeof window.claude.use!=='function'){connecting=false;roomUI();return;}const r=await window.claude.use('room');connecting=false;if(!r){roomUI();return;}lobby=r;attach(r);
-    addLine('','Đã vào phòng chung. Nhấn Enter để chat.',null,{sys:true});
-    const h=(location.hash||'').slice(1);if(/^p-[a-z0-9-]{1,24}$/.test(h))joinCode(h.slice(2));}catch(e){connecting=false;lobby=null;roomUI();}})();
+let netReadyRes;const netReady=new Promise(r=>{netReadyRes=r;});
+(async()=>{try{if(!window.claude||typeof window.claude.use!=='function'){connecting=false;roomUI();netReadyRes();return;}const r=await window.claude.use('room');connecting=false;if(!r){roomUI();netReadyRes();return;}lobby=r;attach(r);netReadyRes();}
+  catch(e){connecting=false;lobby=null;roomUI();netReadyRes();}})();
 
 /* ───────── Update ───────── */
 const tmpV=V(0,0,0),tmpQ=new THREE.Quaternion();
 function update(dt){
   S.t+=dt;S.beat+=dt*S.bpm/60;analyse(dt);tickShow(dt);const t=S.t,sc=SCENES[S.mode],ytHold=ytId&&!ytBlocked&&S.ytState!=null&&S.ytState!==1&&S.ytState!==3,dim=(sc.dim==null?1:sc.dim)*(ytHold?.3:1),bp=S.beat%1,pulse=AUD.on?Math.max(.22*Math.pow(1-bp,2.2),Math.pow(AUD.kick,1.4)):Math.pow(1-bp,2.2),bar=Math.floor(S.beat/4);
   const cA=sc.set[bar%sc.set.length],cB=sc.set[(bar+1)%sc.set.length],cBeat=sc.set[Math.floor(S.beat)%sc.set.length];
-  if(sc.fw){const b=Math.floor(S.beat/8);if(b!==update.lb){update.lb=b;fireworks();}}
+  if(sc.fw){const b=Math.floor(S.beat/8);if(b!==update.lb){update.lb=b;fireworksFx();}}
   S.lz+=((S.lightsOn?1:0)-S.lz)*Math.min(1,dt*4);const lz=S.lz<.004?0:S.lz,lzf=.1+.9*lz;
 
   // nhân vật
@@ -1105,7 +1207,7 @@ function update(dt){
     x.fillStyle='rgba(0,0,0,.72)';x.fillRect(0,326,640,34);x.font='700 19px "Be Vietnam Pro",sans-serif';x.fillStyle=PAL[cBeat];x.textAlign='left';if(!update.tw)update.tw=x.measureText(TICK).width;
     let tx=-((t*70)%update.tw);for(;tx<640;tx+=update.tw)x.fillText(TICK,tx,350);ledT.needsUpdate=true;}
 
-  updatePeers(dt,t);tickFollow(dt);tickNet(dt);
+  updatePeers(dt,t);tickFollow(dt);tickRoom(dt);tickNet(dt);
   const jshow=COARSE&&me.zone.standing&&!me.travel&&cam.mode==='follow';if(jshow!==joy.show){joy.show=jshow;joyEl.style.display=jshow?'block':'none';if(!jshow)joy.x=joy.y=0;}
   // camera
   const seated=!me.zone.standing&&!me.travel;
@@ -1161,7 +1263,7 @@ addEventListener('message',e=>{if(!/^https:\/\/www\.youtube(-nocookie)?\.com$/.t
   if(inferPlay(YT,i.currentTime)&&(S.ytState==null||S.ytState===-1||S.ytState===5||S.ytState===0)){S.ytState=1;if(!hasLocal)$('vPlay').textContent='❚❚';}
   if(!hasLocal&&YT.dur&&!seeking)$('vSeek').value=YT.cur/YT.dur*1000;}catch(err){}});
 const YTERR={2:'Link video không hợp lệ.',5:'Trình duyệt không phát được video này.',100:'Video không tồn tại hoặc đã bị đặt riêng tư.',101:'Chủ video không cho phát ở trang khác — hãy chọn video khác (thường là bản lyric, fancam, live stage).',150:'Chủ video không cho phát ở trang khác — hãy chọn video khác (thường là bản lyric, fancam, live stage).',152:'YouTube từ chối nguồn phát của trang này.',153:'YouTube cần trang được mở qua địa chỉ web (http/https). Hãy mở game bằng file Mo-Concert.bat hoặc từ trang web, không mở trực tiếp file.'};
-function ytError(code){const msg=YTERR[code]||('YouTube báo lỗi '+code+'.');S.led={big:'KHÔNG PHÁT ĐƯỢC',small:msg.slice(0,60)};setTimeout(()=>{if(S.led&&S.led.big==='KHÔNG PHÁT ĐƯỢC')S.led=null;},9000);
+function ytError(code){ROOM.err=performance.now();const msg=YTERR[code]||('YouTube báo lỗi '+code+'.');S.led={big:'KHÔNG PHÁT ĐƯỢC',small:msg.slice(0,60)};setTimeout(()=>{if(S.led&&S.led.big==='KHÔNG PHÁT ĐƯỢC')S.led=null;},9000);
   $('note').textContent='YouTube: '+msg;const url=ytUrl;clearYT();try{addLine('','YouTube: '+msg,null,{sys:true,btn:url?['Mở trên YouTube ↗',()=>window.open(url,'_blank','noopener')]:null});openChat();}catch(e){}}
 let ytSrc='';
 function addMirror(M){const m=document.createElement('iframe');m.allow='autoplay; encrypted-media';m.referrerPolicy='strict-origin-when-cross-origin';m.title='YouTube (màn phụ)';
@@ -1222,7 +1324,7 @@ function ytFail(){if(ytBlocked||!ytId)return;ytBlocked=true;scr.querySelector('i
 document.addEventListener('securitypolicyviolation',e=>{if(/frame|child|default/.test(e.violatedDirective||'')&&/youtube/.test(e.blockedURI||''))ytFail();});
 function unmuteYT(){if(!YT.muted||!ytId||hasLocal)return;YT.muted=false;$('vUnmute').hidden=true;ytCmd('unMute');ytCmd('setVolume',[+$('vVol').value]);}
 $('vUnmute').onclick=unmuteYT;for(const ev of['pointerdown','keydown','touchend'])addEventListener(ev,unmuteYT,true);
-$('ytForm').addEventListener('submit',e=>{e.preventDefault();SY.ytFollow=null;SY.anchor=null;loadYT($('ytIn').value,true);$('ytIn').blur();});
+$('ytForm').addEventListener('submit',e=>{e.preventDefault();if(!ROOM.host)return;if(plAdd($('ytIn').value))$('ytIn').value='';$('ytIn').blur();});
 
 /* ───────── UI ───────── */
 const card=$('card');
@@ -1239,7 +1341,7 @@ for(const k in TIERS){const T=TIERS[k],b=document.createElement('button');b.data
   b.onclick=()=>{const list=zones.filter(z=>z.tier===k);goZone(list[(list.indexOf(S.sel)+1)%list.length]);};tiersEl.appendChild(b);}
 const seg=(id,key,cb)=>$(id).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S[key]=b.dataset.v;
   [...$(id).children].forEach(c=>c.classList.toggle('on',c===b));cb&&cb();});
-seg('modeSeg','mode',()=>{stopShow();setMode(S.mode);if(S.mode==='encore')fireworks();});
+seg('modeSeg','mode',()=>{stopShow();setMode(S.mode);if(S.mode==='encore')fireworksFx();});
 $('showBtn').onclick=()=>{S.show?stopShow():startShow();};
 $('qSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;Q.mode=b.dataset.v;[...$('qSeg').children].forEach(c=>c.classList.toggle('on',c===b));Q.L=Q.mode==='low'?2:0;Q.low=Q.high=0;applyQ();});
 $('emo').addEventListener('click',e=>{const b=e.target.closest('button');if(b)emote(b.dataset.e);});
@@ -1259,7 +1361,7 @@ $('shapeSeg').addEventListener('click',e=>{const b=e.target.closest('button');if
 $('bpm').oninput=e=>{S.bpm=+e.target.value;$('bpmOut').textContent=S.bpm;};
 let taps=[];$('tap').onclick=()=>{const n=performance.now();taps=taps.filter(x=>n-x<2500);taps.push(n);
   if(taps.length>=3){const iv=(taps[taps.length-1]-taps[0])/(taps.length-1);S.bpm=Math.max(60,Math.min(180,Math.round(60000/iv)));$('bpm').value=S.bpm;$('bpmOut').textContent=S.bpm;S.beat=Math.round(S.beat);}};
-$('fw').onclick=fireworks;
+$('fw').onclick=()=>fireworks();
 function toggleLights(){S.lightsOn=!S.lightsOn;$('lightBtn').textContent=S.lightsOn?'💡 Tắt đèn sân khấu':'💡 Bật đèn sân khấu';}
 $('lightBtn').onclick=toggleLights;
 $('labelBtn').onclick=()=>{S.labels=!S.labels;$('labelBtn').textContent=S.labels?'🏷 Ẩn tên khu trên sân':'🏷 Hiện tên khu trên sân';};
@@ -1277,7 +1379,7 @@ const clearKeys=()=>{for(const k in keys)keys[k]=false;};
 addEventListener('keydown',e=>{if(INTRO.on){clearKeys();return;}const tg=e.target.tagName;if(tg==='INPUT'||tg==='TEXTAREA'){clearKeys();return;}if(e.ctrlKey||e.metaKey||e.altKey){clearKeys();return;}
   if(e.code==='Enter'||e.code==='NumpadEnter'){openChat();$('cin').focus();e.preventDefault();return;}
   if(!e.repeat&&/^Digit[123]$/.test(e.code)){emote(['cheer','wave','dance'][+e.code[5]-1]);return;}
-  if(!e.repeat&&e.code==='KeyL'){toggleLights();return;}
+  if(!e.repeat&&e.code==='KeyL'){if(ROOM.host)toggleLights();return;}
   const k=KEYMAP[e.code];if(!k)return;keys[k]=true;e.preventDefault();});
 addEventListener('keyup',e=>{const k=KEYMAP[e.code];if(k)keys[k]=false;if(e.key==='Meta'||e.key==='Control'||e.key==='Alt')clearKeys();});
 addEventListener('blur',clearKeys);document.addEventListener('visibilitychange',clearKeys);document.addEventListener('focusin',e=>{if(e.target.tagName==='INPUT')clearKeys();});
@@ -1293,8 +1395,8 @@ cv.addEventListener('pointermove',e=>{const p=ptrs.get(e.pointerId);if(!p){hover
   else if(ptrs.size===2){const[a,b]=[...ptrs.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1]);if(pinch)zoomBy(pinch/d);pinch=d;}});
 const up=e=>{if(!ptrs.has(e.pointerId))return;ptrs.delete(e.pointerId);cv.classList.toggle('drag',ptrs.size>0);pinch=0;
   if(e.type==='pointerup'&&moved<=6){const h=pick(e.clientX,e.clientY);
-    if(!h&&ray.intersectObjects([ledMain,fohMesh]).length){if(!hasLocal&&ytId&&!ytBlocked)$('vPlay').click();}
-    if(h&&INTRO.on){if(INTRO.step===3)INTRO.pick(h.z);}else if(h){if(h.z===S.sel&&!me.travel){if(okAt(h.p.x,h.p.z)){me.tx=h.p.x;me.ty=h.p.z;}}else goZone(h.z,h.p.x,h.p.z);}}};
+    if(!h&&ray.intersectObjects([ledMain,fohMesh]).length){if(ROOM.host&&!hasLocal&&ytId&&!ytBlocked)$('vPlay').click();}
+    if(h&&INTRO.on){if(INTRO.step===4)INTRO.pick(h.z);}else if(h){if(h.z===S.sel&&!me.travel){if(okAt(h.p.x,h.p.z)){me.tx=h.p.x;me.ty=h.p.z;}}else goZone(h.z,h.p.x,h.p.z);}}};
 cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
 cv.addEventListener('pointerleave',()=>{hoverXY=null;S.hover=null;cv.classList.remove('pt');});
 
@@ -1303,12 +1405,12 @@ try{const dv=localStorage.getItem('mdsim.dens');if(dv){const b=[...$('densSeg').
 applyDensity();resize();showCard();
 try{const s=+localStorage.getItem('mdsim.stick');if(s>0&&s<PAL.length)setStick(s);
   const lk=JSON.parse(localStorage.getItem('mdsim.look')||'null');if(lk&&PRESET[lk.gender])S.look=Object.assign({},PRESET[lk.gender],lk);const nk=localStorage.getItem('mdsim.nick');if(nk){S.nick=nk.slice(0,16);$('nick').value=S.nick;}const sh=+localStorage.getItem('mdsim.shape');if(sh>0&&sh<4)setShape(sh);
-  const y=localStorage.getItem('mdsim.yt');if(y){$('ytIn').value=y;loadYT(y,false);}}catch(e){}
+  }catch(e){}
 rebuildChar();setNick(S.nick);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>setNick(S.nick));
 
-/* ───────── Màn chào: nhân vật → nickname → zone → vào sân ───────── */
-const INTRO={on:true,step:1,zone:null,lab:false};
-{const el=$('intro'),secs=[...el.querySelectorAll('section')],dots=[...el.querySelectorAll('.isteps i')],back=$('iBack'),next=$('iNext'),inick=$('inick'),err=$('inickErr'),iz=$('izone'),isel=$('iblock'),itiers=$('itiers');
+/* ───────── Màn chào: nhân vật → nickname → phòng → zone → vào sân ───────── */
+const INTRO={on:true,step:1,zone:null,lab:false,kind:'pub',code:''};
+{const el=$('intro'),secs=[...el.querySelectorAll('section')],dots=[...el.querySelectorAll('.isteps i')],back=$('iBack'),next=$('iNext'),inick=$('inick'),err=$('inickErr'),iz=$('izone'),isel=$('iblock'),itiers=$('itiers'),rk=$('rkSeg'),rcode=$('rcode'),rerr=$('rErr'),rban=$('rBanner');
   document.body.classList.add('intro');INTRO.lab=S.labels;
   const stand=zones.find(z=>z.standing)||zones[0];
   me.zone=stand;S.sel=stand;{const c=stand.c;me.x=c[0];me.y=c[1];me.h=terr(c[0],c[1]);me.travel=false;me.tx=null;cam.tgt.set(me.x,me.h+26,me.y);}
@@ -1325,26 +1427,49 @@ const INTRO={on:true,step:1,zone:null,lab:false};
   $('inickRand').onclick=()=>{inick.value=NAMES[Math.floor(Math.random()*NAMES.length)]+' '+(10+Math.floor(Math.random()*90));err.textContent='';setNick(inick.value);inick.focus();};
   inick.addEventListener('input',()=>{err.textContent='';setNick(inick.value);$('nick').value=inick.value;});
   inick.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();next.click();}});
+  // chọn phòng
+  const setKind=k=>{INTRO.kind=k;setSeg('rkSeg',k);$('rPub').hidden=k!=='pub';$('rPriv').hidden=k!=='priv';rerr.textContent='';INTRO.refresh();if(k==='priv')setTimeout(()=>rcode.focus({preventScroll:true}),40);};
+  rk.addEventListener('click',e=>{const b=e.target.closest('button');if(b)setKind(b.dataset.v);});
+  rcode.addEventListener('input',()=>{const v=normCode(rcode.value).toUpperCase();if(rcode.value!==v)rcode.value=v;rerr.textContent='';});
+  rcode.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();next.click();}});
+  const snap=()=>{let host=null,n=0;for(const pr of ROOM.peers||[]){if(pr.kind!=='viewer'||pr.sameTab)continue;const q=pr.presence||{};if(!Number.isFinite(q.j))continue;n++;if(!host||q.j<host.j)host={j:q.j,n:cleanText(q.n,16)||'Một người'};}return{n,host};};
+  INTRO.refresh=()=>{if(!INTRO.on)return;const sn=snap(),nm=ROOM.kind==='priv'?'"'+ROOM.code.toUpperCase()+'"':'chung';
+    $('rPubInfo').textContent=connecting?'Đang kết nối…':!lobby?'Chưa kết nối được máy chủ nên bạn sẽ chơi một mình.':ROOM.kind==='pub'?(sn.n?sn.n+' người đang trong sân, chủ phòng: '+sn.host.n+'.':'Hiện chưa có ai, bạn sẽ là chủ phòng.'):'';
+    rban.textContent=!lobby?'Không kết nối được máy chủ: bạn chơi một mình (vẫn dùng được playlist).':sn.n?'Phòng '+nm+' · '+sn.n+' người đang trong sân · chủ phòng: '+sn.host.n+'.':'Phòng '+nm+' đang trống: bạn sẽ là chủ phòng.';};
   const show=n=>{INTRO.step=n;secs.forEach((s,i)=>s.hidden=i!==n-1);dots.forEach((d,i)=>d.classList.toggle('on',i<n));back.hidden=n===1;
-    next.textContent=n===3?'Vào sân vận động':'Tiếp tục';next.disabled=n===3&&!INTRO.zone;
-    if(n===3){cam.mode='over';S.labels=true;overview();if(INTRO.zone)INTRO.pick(INTRO.zone);}
-    else{S.labels=INTRO.lab;follow(n===1?135:120);cam.pitch=.16;}
-    if(n===2)setTimeout(()=>inick.focus({preventScroll:true}),60);el.querySelector('.box').scrollTop=0;};
-  next.onclick=()=>{
+    next.textContent=n===4?'Vào sân vận động':'Tiếp tục';next.disabled=n===4&&!INTRO.zone;next.dataset.busy='';
+    if(n===4){cam.mode='over';S.labels=true;overview();if(INTRO.zone)INTRO.pick(INTRO.zone);}
+    else{S.labels=INTRO.lab;follow(n<=2?(n===1?135:120):150);cam.pitch=.16;}
+    if(n===2)setTimeout(()=>inick.focus({preventScroll:true}),60);
+    if(n===3)setKind(INTRO.kind);
+    INTRO.refresh();el.querySelector('.box').scrollTop=0;};
+  next.onclick=async()=>{
     if(INTRO.step===1){show(2);return;}
     if(INTRO.step===2){const v=inick.value.trim();if(v.length<2){err.textContent='Nickname cần ít nhất 2 ký tự.';inick.focus();return;}setNick(v);$('nick').value=v;show(3);return;}
+    if(INTRO.step===3){if(next.dataset.busy)return;next.dataset.busy='1';next.disabled=true;next.textContent='Đang vào phòng…';
+      try{await Promise.race([netReady,new Promise(r=>setTimeout(r,8000))]);
+        if(INTRO.kind==='priv'){const c=normCode(rcode.value);if(c.length<3){rerr.textContent='Tên phòng cần 3–6 ký tự (chữ hoặc số).';rcode.focus();return;}
+          if(!lobby){rerr.textContent='Chưa kết nối được máy chủ nên chưa vào phòng riêng được. Hãy thử lại sau hoặc chọn Phòng chung.';return;}
+          if(!(ROOM.kind==='priv'&&ROOM.code===c&&RM&&RM!==lobby)&&!(await joinCode(c))){rerr.textContent='Không vào được phòng, hãy thử lại.';return;}}
+        else{if(RM&&RM!==lobby){try{RM.leave().catch(()=>{});}catch(e){}}roomCode='';ROOM.kind='pub';ROOM.code='';setHash('');if(lobby&&RM!==lobby)attach(lobby);}
+        roomUI();show(4);}
+      finally{if(INTRO.step===3){next.disabled=false;next.textContent='Tiếp tục';next.dataset.busy='';}}
+      return;}
     if(!INTRO.zone)return;
-    INTRO.on=false;document.body.classList.remove('intro');S.labels=INTRO.lab;
+    ROOM.j=NOW();INTRO.on=false;document.body.classList.remove('intro');S.labels=INTRO.lab;
     goZone(INTRO.zone,null,null,true);follow(INTRO.zone.sp?250:340);cam.pitch=INTRO.zone.sp?.72:.3;
-    try{localStorage.setItem('mdsim.nick',S.nick);}catch(e){}forceNet=true;};
+    try{localStorage.setItem('mdsim.nick',S.nick);}catch(e){}
+    ROOM.hostPeer=null;ROOM.host=true;refreshHost();document.body.classList.toggle('guest',!ROOM.host&&!!RM);renderPL();roomUI();
+    addLine('',lobby?'Đã vào '+(ROOM.kind==='priv'?'phòng "'+ROOM.code.toUpperCase()+'"':'phòng chung')+'. Nhấn Enter để chat.':'Bạn đang chơi một mình. Nhấn Enter để chat.',null,{sys:true});if(ROOM.host)announceHost();forceNet=true;};
   back.onclick=()=>{if(INTRO.step>1)show(INTRO.step-1);};
   if(S.nick)inick.value=S.nick;
+  {const h=(location.hash||'').slice(1).match(/^p-([a-z0-9]{3,6})$/i);if(h){INTRO.kind='priv';rcode.value=h[1].toUpperCase();}}
   next.disabled=false;
   // nhân vật xoay tròn để xem trước
   (function spin(){if(!INTRO.on)return;if(INTRO.step<3)me.rot+=.014;requestAnimationFrame(spin);})();
 }
-
-window.__sim={INTRO,ledHole,ledMain,fohMesh,sendChat,joinCode,Q,joy,AUD,peersMap,emote,startShow,vid,keys,S,me,cam,zones,goZone,overview,perf,loadYT,handleYt,SY,YT,MIRS};
+renderPL();roomUI();
+window.__sim={ROOM,plAdd,plPlay,plNext,renderPL,refreshHost,INTRO,ledHole,ledMain,fohMesh,sendChat,joinCode,Q,joy,AUD,peersMap,emote,startShow,vid,keys,S,me,cam,zones,goZone,overview,perf,loadYT,handleYt,SY,YT,MIRS};
 // một lỗi lẻ không được làm đứng cả game: báo ra khung chat rồi chạy tiếp
 function loopErr(e){if(loopErr.n)return;loopErr.n=1;try{addLine('','Lỗi khi dựng hình: '+String((e&&e.message)||e).slice(0,140),null,{sys:true});openChat();}catch(x){}}
 let last=performance.now();
