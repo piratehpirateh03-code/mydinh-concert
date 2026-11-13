@@ -502,7 +502,7 @@ body.guest #menuBtn{margin-left:auto}
   </div></details>
   <details id="tkSec" class="lockable"><summary>🎟 Giành vé Ultimate</summary><div class="dbody"><p class="lockmsg">🔒 Chỉ chủ phòng hẹn giờ phiên vé; đến giờ bạn vẫn được mời tham gia.</p>
   <div class="tkown" id="tkOwn" hidden>🎫 Bạn đã sở hữu Vé Vàng Ultimate · mã <b id="tkMyCode"></b></div>
-  <div class="opt2">Hẹn giờ thật (theo đồng hồ thực) cho một phiên bán vé mô phỏng: chỉ 100 vé Ultimate, khoảng 10.000 tài khoản ảo (có cả nhóm săn vé và tool rất nhanh) cùng mọi người chơi thật trong phòng tranh nhau. Về đích trong top 100 sẽ nhận vé vàng, có logo nổi bật ở mọi phòng.</div>
+  <div class="opt2">Hẹn giờ thật (theo đồng hồ thực) cho một phiên bán vé mô phỏng: chỉ 50 vé Ultimate, khoảng 10.000 tài khoản ảo (có cả nhóm săn vé và tool rất nhanh) cùng mọi người chơi thật trong phòng tranh nhau. Về đích trong top 50 sẽ nhận vé vàng, có logo nổi bật ở mọi phòng.</div>
   <div class="tkrow"><input type="datetime-local" id="tkTime" class="sel" aria-label="Ngày giờ mở bán vé (giờ thật)"><button class="btn" id="tkSet">Hẹn giờ</button></div>
   <div class="seg" id="tkLv"><button data-v="easy">Dễ</button><button data-v="std" class="on">Thường</button><button data-v="hard">Như thật</button></div>
   <div class="tkrow"><button class="btn" id="tk30">Thử sau 30 giây</button><button class="btn" id="tkCancel">Huỷ hẹn</button></div>
@@ -537,7 +537,7 @@ body.guest #menuBtn{margin-left:auto}
   <button class="tkx" id="tkX" aria-label="Đóng">✕</button>
   <div class="tkbrand">BIGBANG &lt;XX : COSMOS&gt; · Mỹ Đình<em>MÔ PHỎNG</em></div>
   <h2 id="tkH">Vé ULTIMATE</h2>
-  <div id="tkHud" hidden><span id="tkTm">0,00s</span><span id="tkLeft">Đang tranh: 10.000</span><span>Vé còn: <b id="tkStock">100</b></span></div>
+  <div id="tkHud" hidden><span id="tkTm">0,00s</span><span id="tkLeft">Đang tranh: 10.000</span><span>Vé còn: <b id="tkStock">50</b></span></div>
   <div id="tkBody"></div>
   <div id="tkFeed" aria-hidden="true"></div>
 </div></div>
@@ -1627,7 +1627,7 @@ renderPL();roomUI();
 /* ───────── Giành vé Ultimate: 200 vé, ~10.000 tài khoản ảo cùng người chơi thật trong phòng, theo giờ thật ───────── */
 const TK={at:0,lv:'std',sd:0,rem:0,done:0,on:false,open:false,auto:false,st:'',t0:0,pen:0,bots:null,raf:0,feedT:0,cap:'',ent:'',msg:'',th:0,rt:[],real:0,resA:0,resT:0,resW:0,seen:new Set()};
 const TKLV={easy:{f:[6.2,8.4],n:'Dễ'},std:{f:[4.8,6.5],n:'Thường'},hard:{f:[3.5,4.5],n:'Như thật'}};
-const TKN=10000,TKT=100,fmtN=n=>Math.round(n).toLocaleString('vi-VN'),pad2=n=>String(n).padStart(2,'0'),sec2=x=>x.toFixed(2).replace('.',',');
+const TKN=10000,TKT=50,fmtN=n=>Math.round(n).toLocaleString('vi-VN'),pad2=n=>String(n).padStart(2,'0'),sec2=x=>x.toFixed(2).replace('.',',');
 const fmtCd=ms=>{const s=Math.max(0,Math.ceil(ms/1000)),h=Math.floor(s/3600);return(h?h+':':'')+pad2(Math.floor(s%3600/60))+':'+pad2(s%60);};
 const fmtClk=ms=>{const d=new Date(ms),t=pad2(d.getHours())+':'+pad2(d.getMinutes())+':'+pad2(d.getSeconds());return new Date().toDateString()===d.toDateString()?t:t+' ngày '+pad2(d.getDate())+'/'+pad2(d.getMonth()+1);};
 const locIso=ms=>{const d=new Date(ms);return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())+'T'+pad2(d.getHours())+':'+pad2(d.getMinutes());};
