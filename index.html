@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Mỹ Đình Concert Sim</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -198,6 +198,84 @@ summary:hover{background:rgba(255,255,255,.04)}
   .yt{width:auto;flex:1}
   .zoom{top:auto;bottom:12px}
 }
+
+/* ═══ Giao diện v2 · dễ nhìn trên laptop và điện thoại dọc ═══ */
+:root{--glass:rgba(14,16,30,.9);--line:rgba(255,255,255,.15);--dim:#b0b7cb;--ring:#ffd84a;--sb:env(safe-area-inset-bottom,0px);--st:env(safe-area-inset-top,0px)}
+button,input,select,.up,summary{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:2px solid var(--ring);outline-offset:2px}
+button,.up,summary{transition:background-color .15s,transform .12s,border-color .15s}
+button:active:not(:disabled){transform:scale(.96)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
+.ic{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.bar{padding:calc(10px + var(--st)) calc(14px + env(safe-area-inset-right,0px)) 10px calc(14px + env(safe-area-inset-left,0px))}
+.brand b{font-size:16px}.brand span{font-size:12px;color:var(--dim)}
+.yt{padding:4px 4px 4px 16px;gap:8px;min-height:50px;background:var(--glass);border-color:rgba(255,255,255,.22)}
+.yt input{font-size:14px;min-height:40px}.yt input::placeholder{color:#8f97ad}
+.yt button{min-height:40px;padding:0 18px;font-size:14px}
+.yt a{font-size:13px;padding:0 12px;min-height:40px;align-items:center;color:var(--ink)}.yt a.on{display:inline-flex}
+.up{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:0 14px;font-size:13px;color:var(--ink)}
+#vbar{top:calc(68px + var(--st));left:218px;max-width:min(560px,calc(100vw - 580px));min-height:48px;font-size:13px;background:var(--glass)}
+#vbar button{width:38px;height:38px}
+.zoom{display:flex;gap:6px;top:calc(68px + var(--st));left:max(12px,env(safe-area-inset-left,0px))}
+.zoom button{width:44px;height:44px;font-size:18px;background:var(--glass)}
+#panel{width:316px;top:calc(68px + var(--st));right:max(12px,env(safe-area-inset-right,0px));max-height:calc(100dvh - 84px - var(--st));border-radius:18px;background:var(--glass);box-shadow:0 12px 40px rgba(0,0,0,.45)}
+.phead,summary,#chatHead{font-family:"Be Vietnam Pro",system-ui,sans-serif;text-transform:none;letter-spacing:.01em;font-size:14px;font-weight:700;min-height:48px;color:var(--ink)}
+.phead{background:rgba(18,20,36,.98);padding:0 16px;position:sticky}
+summary{padding:0 16px;font-weight:600}summary::after{font-size:18px;color:var(--dim)}
+.dbody{padding:4px 16px 18px}
+.opt2{font-size:13px;color:var(--dim)}.opt{font-size:13px}
+.help{font-size:13px;line-height:1.6}.note{font-size:12px;color:#8f97ad}
+.btn{min-height:44px;font-size:13.5px;border-radius:12px}
+.seg{border-radius:12px;padding:4px}.seg button{min-height:40px;font-size:13px;color:#b8bfd2;padding:0 4px}.seg button.on{color:#0b0c14}
+.sel,.nick{min-height:44px;font-size:14px}
+.tiers button{min-height:44px;font-size:13.5px}.tiers em{font-size:12px}
+.sw button{width:34px;height:34px}.sw.sm{gap:8px}.sw.sm button{width:30px;height:30px}
+.row{font-size:13px}.row input[type=range]{height:28px}
+#chat{background:var(--glass);box-shadow:0 8px 30px rgba(0,0,0,.4)}
+#chatHead{padding:0 14px;position:relative}#chatHead em{font-size:12px}
+.croom input,#cform input{min-height:44px;font-size:14px}
+.croom button,#cform button{min-height:44px;font-size:13.5px;padding:0 16px}
+#roomInfo,.chk{font-size:12.5px;color:var(--dim)}.chk{min-height:32px}.chk input{width:18px;height:18px;accent-color:var(--accent)}
+#clog{font-size:13.5px}.cl.sys{font-size:12.5px}
+#dock{width:min(348px,calc(100vw - 24px));left:max(12px,env(safe-area-inset-left,0px));bottom:calc(12px + var(--sb))}
+#card{padding:14px 16px;background:var(--glass)}#card h2{font-size:16px}#card .meta{font-size:13px}#card p{font-size:13px;line-height:1.55}
+#emo{bottom:calc(14px + var(--sb));padding:6px;gap:8px;background:var(--glass)}
+#emo button{width:48px;height:48px;font-size:20px}
+#chips{bottom:calc(14px + var(--sb));font-size:12px;color:var(--dim)}#chips span{padding:5px 10px;background:var(--glass)}
+#scrim{position:fixed;inset:0;z-index:8;background:rgba(0,0,0,.55);display:none}
+@media (max-width:860px){
+ .bar{padding:calc(8px + var(--st)) 10px 6px}
+ .yt{width:100%;flex:1;padding-left:14px}
+ .yt input{font-size:16px}.yt .up span,.yt a.on{display:none}.up{width:44px;padding:0;justify-content:center}
+ .yt button{padding:0 16px}
+ #menuBtn{position:fixed;display:grid;place-items:center;right:12px;bottom:calc(12px + var(--sb));width:54px;height:54px;padding:0;border:0;border-radius:50%;background:var(--accent);color:#15130a;z-index:6;box-shadow:0 6px 20px rgba(0,0,0,.55)}
+ #menuBtn .ic{width:24px;height:24px}
+ #emo{left:50%;bottom:calc(12px + var(--sb));padding:4px;gap:6px}#emo button{width:46px;height:46px}
+ #dock{left:12px;right:auto;width:auto;bottom:calc(12px + var(--sb));z-index:8}
+ #chat.min{border-radius:999px}#chat.min #chatHead{min-height:54px;padding:0 18px}#chat.min #chatHead i{display:none}
+ #chat:not(.min){position:fixed;left:0;right:0;bottom:0;z-index:8;width:auto;border-radius:22px 22px 0 0;max-height:min(64vh,580px);padding-bottom:var(--sb)}
+ #chat:not(.min) #chatHead::before{content:"";position:absolute;top:6px;left:50%;width:40px;height:4px;margin-left:-20px;border-radius:4px;background:rgba(255,255,255,.3)}
+ #chat:not(.min) #chatHead{padding-top:8px}
+ .cbody{padding:0 14px 14px}#clog{height:min(28vh,230px)}
+ .croom input,#cform input{font-size:16px}
+ #dock #card{display:block;position:fixed;top:calc(64px + var(--st));left:10px;right:auto;bottom:auto;width:auto;max-width:calc(100vw - 20px);padding:8px 12px;border-radius:12px;pointer-events:none}
+ #card h2{display:inline;font-size:14px;margin-right:8px}#card .meta{display:inline-flex;gap:8px;font-size:12.5px;vertical-align:baseline}#card p{display:none}#card .meta span:last-child{display:none}
+ #vbar{top:calc(112px + var(--st));left:10px;right:10px;max-width:none}
+ .zoom{flex-direction:column;left:auto;right:16px;top:auto;bottom:calc(80px + var(--sb))}
+ #chips{left:14px;right:auto;bottom:calc(76px + var(--sb))}#fps{display:none}
+ #joy{left:18px;bottom:calc(110px + var(--sb))}
+ #scrim.on{display:block}
+ #panel{display:none;position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;max-height:84dvh;border-radius:22px 22px 0 0;z-index:9;padding-bottom:var(--sb)}
+ #panel.open{display:block;animation:sheetUp .2s ease-out}
+ #panel.min,#panel.min .pbody{width:auto}#panel.min .pbody{display:block}
+ .phead{padding-top:14px}.phead::before{content:"";position:absolute;top:6px;left:50%;width:40px;height:4px;margin-left:-20px;border-radius:4px;background:rgba(255,255,255,.3)}
+ #panel .phead i{transform:rotate(45deg);margin-top:-4px}
+ .sw button{width:38px;height:38px}.sw.sm button{width:34px;height:34px}.sw.sm{gap:10px}
+ .sel,.nick{font-size:16px}
+}
+@media (max-width:420px){#chat.min #chatHead .lbl{display:none}#chat.min #chatHead{padding:0 16px}#emo button{width:44px;height:44px}}
+@media (max-width:860px) and (max-height:520px){#chat:not(.min){max-height:82vh}#clog{height:78px}#panel{max-height:88dvh}#emo button{width:42px;height:42px}.zoom{flex-direction:row}}
+@keyframes sheetUp{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
 </style>
 </head>
 <body>
@@ -208,7 +286,7 @@ summary:hover{background:rgba(255,255,255,.04)}
 <div id="screen3" class="scrS" style="display:none"></div>
 <div id="screen4" class="scrS" style="display:none"></div>
 
-<div id="vbar" hidden><button id="vPlay" title="Phát / tạm dừng">❚❚</button><span id="vName"></span><span id="vTime"></span><input type="range" id="vSeek" min="0" max="1000" value="0" title="Tua"><input type="range" id="vVol" min="0" max="100" value="80" title="Âm lượng"><button id="vClose" title="Tắt video">✕</button></div>
+<div id="vbar" hidden><button id="vPlay" title="Phát / tạm dừng" aria-label="Phát / tạm dừng">❚❚</button><span id="vName"></span><span id="vTime"></span><input type="range" id="vSeek" min="0" max="1000" value="0" title="Tua"><input type="range" id="vVol" min="0" max="100" value="80" title="Âm lượng"><button id="vClose" title="Tắt video" aria-label="Tắt video">✕</button></div>
 
 <header class="bar">
   <div class="brand">
@@ -218,10 +296,10 @@ summary:hover{background:rgba(255,255,255,.04)}
   <form class="yt" id="ytForm">
     <input id="ytIn" placeholder="Dán link YouTube…" autocomplete="off" spellcheck="false">
     <a id="ytOpen" target="_blank" rel="noopener">Mở YouTube ↗</a>
-    <label class="up" title="Chọn file video hoặc nhạc trong máy để chiếu lên màn LED">🎬 Tải video<input type="file" id="vidIn" accept="video/*,audio/*" hidden></label>
+    <label class="up" title="Chọn file video hoặc nhạc trong máy để chiếu lên màn LED"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"/></svg><span>Tải video</span><input type="file" id="vidIn" accept="video/*,audio/*" hidden></label>
     <button>Lên sóng</button>
   </form>
-  <button id="menuBtn" aria-label="Bảng điều khiển">☰</button>
+  <button id="menuBtn" aria-label="Mở bảng điều khiển"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
 </header>
 
 <div class="zoom">
@@ -231,6 +309,7 @@ summary:hover{background:rgba(255,255,255,.04)}
   <button id="zMe" title="Camera theo nhân vật">◎</button>
 </div>
 
+<div id="scrim"></div>
 <aside id="panel">
   <button class="phead" id="pHead"><span>Tùy chọn</span><i></i></button>
   <div class="pbody">
@@ -287,7 +366,7 @@ summary:hover{background:rgba(255,255,255,.04)}
 
 <div id="dock">
   <section id="chat">
-    <button id="chatHead"><span>💬 Chat</span><em id="chatCount"></em><i></i></button>
+    <button id="chatHead"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><span class="lbl">Chat</span><em id="chatCount"></em><i></i></button>
     <div class="cbody">
       <div class="croom"><input id="roomIn" maxlength="24" placeholder="Mã phòng riêng (tuỳ chọn)" autocomplete="off" spellcheck="false"><button id="roomBtn">Vào phòng</button></div>
       <div id="roomInfo">Đang kết nối…</div>
@@ -693,7 +772,7 @@ function frameLED(){const ey=me.h+27,ex=me.x,ez=me.y,tx=800-ex,ty=LCY-ey,tz=LED.
   let rx=-fz,rz=fx;const rl=Math.hypot(rx,rz)||1;rx/=rl;rz/=rl;const ux=-rz*fy,uy=rz*fx-rx*fz,uz=rx*fy;
   let nx=0,ny=0;for(const[cx,cy]of FIT){const vx=cx-ex,vy=cy-ey,vz=LED.z-ez,d=vx*fx+vy*fy+vz*fz;if(d<5)continue;
     nx=Math.max(nx,Math.abs(vx*rx+vz*rz)/d);ny=Math.max(ny,Math.abs(vx*ux+vy*uy+vz*uz)/d);}
-  const pw=W>860&&!$('panel').classList.contains('min')?320:0,asp=(W-pw)/H,th=Math.max(ny/.78,nx/(asp*.9)),fov=Math.max(55,Math.min(100,2*Math.atan(th)/D2R));
+  const pw=W>860&&!$('panel').classList.contains('min')?340:0,asp=(W-pw)/H,th=Math.max(ny/.78,nx/(asp*.9)),fov=Math.max(55,Math.min(100,2*Math.atan(th)/D2R));
   camera.fov=fov;camera.updateProjectionMatrix();cam.fy=Math.atan2(tx,tz);cam.fpp=Math.asin(fy);
   if(pw)cam.fy-=Math.atan(pw/W*Math.tan(fov*D2R/2)*W/H);}
 function enterFP(){cam.mode='fp';frameLED();
@@ -922,8 +1001,8 @@ function update(dt){
   washA.color.copy(PC[cA]);washA.intensity=(1.1+.9*pulse)*Math.max(.25,dim)*lz;washB.color.copy(PC[cB]);washB.intensity=(.9+.7*pulse)*Math.max(.25,dim)*lz;
   const ytOn=!!ytId&&!ytBlocked,mir=ytOn&&!!scr2.firstChild;ledHole.visible=ytOn;fohMesh.material=mir?holeMat:ledMat;for(const m of MIRS)if(m.mesh)m.mesh.material=ytOn&&m.el.firstChild?holeMat:ledMat;
   {const vOK=hasLocal&&vid.videoWidth&&vid.readyState>=2;if((update.wt=(update.wt||0)+dt)>(vOK&&!vid.paused?1/30:.08)){update.wt=0;if(vOK){try{vfX.drawImage(vid,0,0,640,360);vfT.needsUpdate=true;}catch(e){}drawWall(vfC,vid.videoWidth,vid.videoHeight);}else drawWall(ledC,640,360);}}
-  if(ytOn&&(update.ms=(update.ms||0)+dt)>1.2){update.ms=0;for(const m of MIRS){if(!m.el.firstChild)continue;if(S.ytState===1&&m.state!==1)ytCmd('playVideo',[],m);else if(S.ytState===2&&m.state===1)ytCmd('pauseVideo',[],m);
-    if(S.ytState===1&&YT.cur>0&&Math.abs(m.cur-YT.cur)>.8)ytCmd('seekTo',[YT.cur+.25,true],m);}}
+  if(ytOn&&(update.ms=(update.ms||0)+dt)>.5){update.ms=0;const nw=performance.now();for(const m of MIRS){if(!m.el.firstChild)continue;if(S.ytState===1&&m.state!==1)ytCmd('playVideo',[],m);else if(S.ytState===2&&m.state===1)ytCmd('pauseVideo',[],m);
+    if(S.ytState===1&&YT.cur>0&&Math.abs(m.cur-YT.cur)>.45&&nw-(m.sk||0)>3000){m.sk=nw;ytCmd('seekTo',[YT.cur+.3,true],m);}}}
   if((update.st=(update.st||0)+dt)>.1){update.st=0;if(hasLocal&&vid.videoWidth&&vid.readyState>=2)sampleLed(vfC);else if(ytOn)ledAvg.setRGB(.55,.6,.75);else sampleLed(ledC);}
   if(hasLocal&&performance.now()-(update.wd||0)>1000){update.wd=performance.now();const ct=vid.currentTime;$('vTime').textContent=mmss(ct)+(isFinite(vid.duration)&&vid.duration?' / '+mmss(vid.duration):'');
     if(!vid.paused&&!vid.ended&&vid.readyState>0&&ct===update.wc){update.ws=(update.ws||0)+1;if(update.ws===3){try{vid.currentTime=ct+.05;vid.play().catch(()=>{});}catch(e){}
@@ -943,7 +1022,7 @@ function update(dt){
   if(sc.laser){for(let i=0;i<12;i++){const a=(i-5.5)*.17*Math.sin(t*.9*bspd)+Math.sin(t*2.3+i)*.05,e=-.12+.5*(.5+.5*Math.sin(t*.6*bspd+i*.5)),k=i*6;
       laserP[k]=800;laserP[k+1]=246;laserP[k+2]=262;laserP[k+3]=800+Math.sin(a)*2600;laserP[k+4]=246+Math.sin(e)*2600*.35-260;laserP[k+5]=262+Math.cos(a)*2600;}
     laserG.attributes.position.needsUpdate=true;lasers.material.color.copy(PC[i2(bar)]).multiplyScalar((AUD.on?.25+2.2*AUD.treb:.45+.4*pulse)*lz);}
-  perf[0].g.position.set(800,30,640+Math.sin(t*.35)*150);perf[1].g.position.set(800+Math.sin(t*.3+1)*240,44,385);perf[2].g.position.set(800+Math.sin(t*.45+3)*38,30,869+Math.cos(t*.45+3)*38);
+  {const ca=t*.45+3;perf[2].g.position.set(800+Math.sin(ca)*38,30,869+Math.cos(ca)*38);perf[0].g.position.set(720+Math.sin(t*.38)*16,30,885+Math.cos(t*.31)*22);perf[1].g.position.set(880+Math.sin(t*.33+2)*16,30,853+Math.cos(t*.41+1)*22);}
   perf.forEach((c,i)=>{const b=S.beat*Math.PI+i*1.3,st=Math.sin(b);c.root.position.y=Math.abs(st)*3;c.g.rotation.y=Math.sin(t*.6+i*2)*.45;
     c.legL.rotation.x=st*.45;c.legR.rotation.x=-st*.45;c.armL.rotation.z=.25+Math.abs(Math.sin(b*.5))*1.1;c.armL.rotation.x=-st*.4;
     c.armR.rotation.x=Math.PI*.82+Math.sin(b*.5+i)*.5;c.armR.rotation.z=-st*.3;});
@@ -1080,7 +1159,7 @@ const card=$('card');
 function showCard(){const z=S.sel;const T=TIERS[z.tier];card.style.setProperty('--c',T.c);
   card.innerHTML=`<h2>${z.label}</h2><div class="meta"><b>${T.price}</b><span>Vé ${T.type.toLowerCase()}</span><span>${z.fans.toLocaleString('vi')} fan trong khu</span></div><p>${T.d}</p><p style="color:var(--ink)">${z.standing?'Khu đứng: đi lại bằng WASD / phím mũi tên hoặc bấm vào chỗ muốn tới.':'Khu ghế ngồi: góc nhìn thứ nhất từ ghế của bạn. Kéo để nhìn quanh, cuộn để phóng to, bấm một chỗ khác trong khu để đổi ghế.'}</p>`;
   document.querySelectorAll('#tiers button').forEach(b=>b.classList.toggle('on',b.dataset.t===z.tier));}
-function goZone(z,x,y,inst){S.sel=z;me.zone=z;const good=(a,b)=>a!=null&&inPoly(z.poly,a,b)&&cellZone(a,b)===z.i;
+function goZone(z,x,y,inst){if(MOB())closeSheet();S.sel=z;me.zone=z;const good=(a,b)=>a!=null&&inPoly(z.poly,a,b)&&cellZone(a,b)===z.i;
   if(!good(x,y)){x=z.c[0];y=z.c[1];if(!good(x,y)){const c=cells[z.cells[z.cells.length>>1]];x=c.x;y=c.z;}}
   me.tx=x;me.ty=y;me.travel=true;showCard();follow(z.sp?250:340);cam.pitch=z.sp?.72:.3;
   if(inst){me.x=x;me.y=y;me.h=terr(x,y);me.travel=false;me.tx=null;cam.tgt.set(x,me.h+26,y);cam.d=cam.dist;}}
@@ -1098,7 +1177,10 @@ $('emo').addEventListener('click',e=>{const b=e.target.closest('button');if(b)em
  sel.onchange=()=>{if(sel.value==='')return;goZone(zones[+sel.value],null,null,true);sel.blur();};}
 seg('crowdSeg','crowd');
 $('densSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S.dens=+b.dataset.v;[...$('densSeg').children].forEach(c=>c.classList.toggle('on',c===b));applyDensity();showCard();try{localStorage.setItem('mdsim.dens',b.dataset.v);}catch(e){}});
-$('pHead').onclick=()=>$('panel').classList.toggle('min');
+function MOB(){return innerWidth<=860;}
+function closeSheet(){$('panel').classList.remove('open');$('scrim').classList.remove('on');}
+$('pHead').onclick=()=>{if(MOB())closeSheet();else $('panel').classList.toggle('min');};
+$('scrim').onclick=closeSheet;addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet();});addEventListener('resize',()=>{if(!MOB())closeSheet();});
 $('genderSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(b){S.look=Object.assign({},PRESET[b.dataset.v]);rebuildChar();}});
 document.querySelectorAll('#panel .sw[data-k]').forEach(el=>{(el.dataset.k==='hairC'?HAIRC:CLOTHC).forEach(c=>{const b=document.createElement('button');b.dataset.v=c;b.style.setProperty('--c',c);b.title='Màu';el.appendChild(b);});});
 document.querySelectorAll('#panel [data-k]').forEach(el=>el.addEventListener('click',e=>{const b=e.target.closest('button');if(b){S.look[el.dataset.k]=b.dataset.v;rebuildChar();}}));
@@ -1116,7 +1198,7 @@ PAL.forEach((c,i)=>{const b=document.createElement('button');b.style.setProperty
   b.onclick=()=>{setStick(i);try{localStorage.setItem('mdsim.stick',i);}catch(e){}};$('stickSw').appendChild(b);});
 const zoomBy=f=>{if(cam.mode==='fp'){camera.fov=Math.max(16,Math.min(75,camera.fov*f));camera.updateProjectionMatrix();}else cam.dist=Math.max(70,Math.min(3600,cam.dist*f));};
 $('zIn').onclick=()=>zoomBy(.72);$('zOut').onclick=()=>zoomBy(1.4);$('zAll').onclick=overview;$('zMe').onclick=()=>follow();
-$('menuBtn').onclick=()=>$('panel').classList.toggle('open');
+$('menuBtn').onclick=()=>{const o=$('panel').classList.toggle('open');$('scrim').classList.toggle('on',o);};
 
 /* ───────── Input ───────── */
 // dùng mã phím vật lý (e.code) để không bị kẹt phím khi đang bật bộ gõ tiếng Việt
