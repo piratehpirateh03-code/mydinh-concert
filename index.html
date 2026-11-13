@@ -498,8 +498,8 @@ const add=(m,x=0,y=0,z=0)=>{m.position.set(x,y,z);scene.add(m);return m;};
 
 scene.add(new THREE.HemisphereLight(0x6672a0,0x10101a,.75));
 {const dl=new THREE.DirectionalLight(0x9fb0e8,.5);dl.position.set(-.5,1,.6);scene.add(dl);}
-const washA=add(new THREE.PointLight(0xffffff,1.5,2400,1.2),800,300,640);
-const washB=add(new THREE.PointLight(0xffffff,1.2,1100,1.2),800,170,869);
+const washA=add(new THREE.PointLight(0xffffff,0,1,2),800,300,640);
+const washB=add(new THREE.PointLight(0xffffff,0,1,2),800,170,869);
 
 // nền + mặt sân
 add(new THREE.Mesh(new THREE.CircleGeometry(5000,48),new THREE.MeshBasicMaterial({color:0x06070d})),800,-2,1140).rotation.x=-Math.PI/2;
@@ -644,11 +644,13 @@ const gTop=beamGeo(1900,95),gFront=beamGeo(1100,60),gTower=beamGeo(1000,70);
 const fixtures=[];const DOWN=V(0,-1,0);
 const mkFix=(x,y,z,k,type,geo)=>{const mat=new THREE.MeshBasicMaterial(Object.assign({vertexColors:true,side:THREE.DoubleSide,fog:false},ADD));
   const cone=add(new THREE.Mesh(geo,mat),x,y,z);cone.frustumCulled=false;
-  const dot=new THREE.Sprite(new THREE.SpriteMaterial(Object.assign({map:glowTex,fog:false},ADD)));dot.scale.set(34,34,1);add(dot,x,y,z);
+  const dot=new THREE.Sprite(new THREE.SpriteMaterial(Object.assign({map:glowTex,fog:false},ADD)));dot.scale.set(46,46,1);add(dot,x,y,z);
   add(new THREE.Mesh(new THREE.SphereGeometry(4,8,6),dark),x,y,z);fixtures.push({x,y,z,k,type,cone,mat,dot});};
 for(let i=0;i<12;i++)mkFix(490+i*620/11,251,440,i,'top',gTop);
 for(let i=0;i<6;i++)mkFix(540+i*104,47,424,i+20,'front',gFront);
 [[IX(279),IZ(290)],[IX(521),IZ(290)],[770,IZ(385)],[830,IZ(385)]].forEach(([x,z],i)=>mkFix(x,68,z,i+40,'tower',gTower));
+{const V4=[[BST[0],BST[1]-BST[3]],[BST[0]+BST[2],BST[1]],[BST[0],BST[1]+BST[3]],[BST[0]-BST[2],BST[1]]];let n=60;
+  for(let e=0;e<4;e++){const a=V4[e],b=V4[(e+1)%4];for(let j=0;j<8;j++){const u=j/8;mkFix(a[0]+(b[0]-a[0])*u,34,a[1]+(b[1]-a[1])*u,n++,'edge',gTower);}}}
 const laserG=new THREE.BufferGeometry();const laserP=new Float32Array(12*6);laserG.setAttribute('position',new THREE.BufferAttribute(laserP,3));
 const lasers=new THREE.LineSegments(laserG,new THREE.LineBasicMaterial(Object.assign({color:0x5dffb0,fog:false},ADD)));lasers.frustumCulled=false;scene.add(lasers);
 // nghệ sĩ (hình trừu tượng) + đèn follow
@@ -816,7 +818,7 @@ function emote(k){if(!EMO[k])return;S.emote={k,t:S.t,n:(S.emote?S.emote.n:0)+1};
 
 /* ───────── Chất lượng tự động ───────── */
 function applyQ(){const L=Q.L;renderer.setPixelRatio(L===0?Math.min(2,window.devicePixelRatio||1):L===1?1:.75);renderer.setSize(W,H,false);Q.cap=L===2?.15:1;applyDensity();showCard();
-  fixtures.forEach((f,i)=>{f.cone.visible=!(L===2&&f.type==='top'&&i%2);});try{syncMirrorQuality();}catch(e){}}
+  fixtures.forEach(f=>{f.cone.visible=false;});try{syncMirrorQuality();}catch(e){}}
 function tickQ(raw){Q.acc+=raw;Q.n++;if(Q.acc<1)return;Q.fps=Math.round(Q.n/Q.acc);Q.acc=0;Q.n=0;$('fps').textContent=Q.fps+' FPS'+(Q.L?' · tiết kiệm '+Q.L:'');
   if(Q.mode!=='auto')return;Q.cool--;if(Q.fps<27){Q.low++;Q.high=0;}else if(Q.fps>55){Q.high++;Q.low=0;}else{Q.low=0;Q.high=0;}
   if(Q.low>=3&&Q.L<2&&Q.cool<=0){Q.L++;Q.low=0;Q.cool=6;applyQ();}else if(Q.high>=12&&Q.L>0&&Q.cool<=0){Q.L--;Q.high=0;Q.cool=20;applyQ();}}
@@ -1001,7 +1003,7 @@ function update(dt){
   blocks.instanceColor.needsUpdate=true;
 
   // đèn
-  washA.color.copy(PC[cA]);washA.intensity=(1.1+.9*pulse)*Math.max(.25,dim)*lz;washB.color.copy(PC[cB]);washB.intensity=(.9+.7*pulse)*Math.max(.25,dim)*lz;
+  washA.color.copy(PC[cA]);washA.intensity=0;washB.color.copy(PC[cB]);washB.intensity=0;
   const ytOn=!!ytId&&!ytBlocked,mir=ytOn&&!!scr2.firstChild;ledHole.visible=ytOn;fohMesh.material=mir?holeMat:ledMat;for(const m of MIRS)if(m.mesh)m.mesh.material=ytOn&&m.el.firstChild?holeMat:ledMat;
   {const vOK=hasLocal&&vid.videoWidth&&vid.readyState>=2;if((update.wt=(update.wt||0)+dt)>(vOK&&!vid.paused?1/30:.08)){update.wt=0;if(vOK){try{vfX.drawImage(vid,0,0,640,360);vfT.needsUpdate=true;}catch(e){}drawWall(vfC,vid.videoWidth,vid.videoHeight);}else drawWall(ledC,640,360);}}
   if(ytOn&&(update.ms=(update.ms||0)+dt)>.5){update.ms=0;const nw=performance.now();for(const m of MIRS){if(!m.el.firstChild)continue;if(S.ytState===1&&m.state!==1)ytCmd('playVideo',[],m);else if(S.ytState===2&&m.state===1)ytCmd('pauseVideo',[],m);
@@ -1011,18 +1013,18 @@ function update(dt){
     if(!vid.paused&&!vid.ended&&vid.readyState>0&&ct===update.wc){update.ws=(update.ws||0)+1;if(update.ws===3){try{vid.currentTime=ct+.05;vid.play().catch(()=>{});}catch(e){}
         if(!update.wr){update.wr=1;try{addLine('','Video bị kẹt (mã r'+vid.readyState+' n'+vid.networkState+' w'+vid.videoWidth+' a'+(actx?actx.state[0]:'-')+(vid.error?' e'+vid.error.code:'')+'). Đang thử chạy lại…',null,{sys:true});openChat();}catch(e){}}}}
     else update.ws=0;update.wc=ct;}
-  const lum=Math.max(.15,Math.min(1,ledAvg.r*.3+ledAvg.g*.59+ledAvg.b*.11+.15));ledGlow.color.copy(ledAvg).multiplyScalar(1/lum*.6+.4);ledGlow.intensity=(ytOn&&S.ytState!==1?.4:1.25)*lum*Math.max(.35,dim);
-  haloMat.color.copy(ledGlow.color);haloMat.opacity=.12+.16*lum;
+  const lum=Math.max(.15,Math.min(1,ledAvg.r*.3+ledAvg.g*.59+ledAvg.b*.11+.15));ledGlow.color.copy(ledAvg).multiplyScalar(1/lum*.6+.4);ledGlow.intensity=0;
+  haloMat.opacity=0;halo.visible=false;
   const bspd=S.bpm/120*sc.spd;
   for(const f of fixtures){const ci=sc.set[(bar+f.k)%sc.set.length];let tx,ty,tz;
     if(f.type==='top'){tx=800+(f.x-800)*1.5+Math.sin(t*1.1*bspd+f.k*.63)*780*sc.amp;ty=0;tz=1150+Math.cos(t*.8*bspd+f.k*.9)*760*sc.amp;}
     else if(f.type==='front'){tx=f.x+Math.sin(t*1.3*bspd+f.k)*520*sc.amp+(f.x-800)*.8;ty=f.y+620;tz=f.z+260+Math.cos(t*.9*bspd+f.k*1.7)*330*sc.amp;}
-    else{tx=800+Math.sin(t*.7*bspd+f.k*2.1)*420;ty=20+60*Math.sin(t*.5+f.k);tz=700+Math.cos(t*.6*bspd+f.k)*360;}
+    else if(f.type==='edge'){tx=f.x;ty=f.y-1;tz=f.z;}else{tx=800+Math.sin(t*.7*bspd+f.k*2.1)*420;ty=20+60*Math.sin(t*.5+f.k);tz=700+Math.cos(t*.6*bspd+f.k)*360;}
     tmpV.set(tx-f.x,ty-f.y,tz-f.z).normalize();f.cone.quaternion.setFromUnitVectors(DOWN,tmpV);
     const inten=(f.type==='top'?.34:.26)*(.45+.55*(S.mode==='ballad'?.8:(Math.floor(S.beat*2+f.k)%2?pulse:1)));
-    f.mat.color.copy(PC[ci]).multiplyScalar(inten*dim*lz);f.dot.material.color.copy(PC[ci]).multiplyScalar(lz);}
-  lasers.visible=!!sc.laser&&lz>0;
-  if(sc.laser){for(let i=0;i<12;i++){const a=(i-5.5)*.17*Math.sin(t*.9*bspd)+Math.sin(t*2.3+i)*.05,e=-.12+.5*(.5+.5*Math.sin(t*.6*bspd+i*.5)),k=i*6;
+    f.cone.visible=false;f.dot.material.color.copy(PC[ci]).multiplyScalar(lz);}
+  lasers.visible=false;
+  if(false){for(let i=0;i<12;i++){const a=(i-5.5)*.17*Math.sin(t*.9*bspd)+Math.sin(t*2.3+i)*.05,e=-.12+.5*(.5+.5*Math.sin(t*.6*bspd+i*.5)),k=i*6;
       laserP[k]=800;laserP[k+1]=246;laserP[k+2]=262;laserP[k+3]=800+Math.sin(a)*2600;laserP[k+4]=246+Math.sin(e)*2600*.35-260;laserP[k+5]=262+Math.cos(a)*2600;}
     laserG.attributes.position.needsUpdate=true;lasers.material.color.copy(PC[i2(bar)]).multiplyScalar((AUD.on?.25+2.2*AUD.treb:.45+.4*pulse)*lz);}
   {const ca=t*.45+3;perf[2].g.position.set(800+Math.sin(ca)*38,30,869+Math.cos(ca)*38);perf[0].g.position.set(720+Math.sin(t*.38)*16,30,885+Math.cos(t*.31)*22);perf[1].g.position.set(880+Math.sin(t*.33+2)*16,30,853+Math.cos(t*.41+1)*22);}
