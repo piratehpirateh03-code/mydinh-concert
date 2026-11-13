@@ -276,6 +276,8 @@ summary{padding:0 16px;font-weight:600}summary::after{font-size:18px;color:var(-
 @media (max-width:420px){#chat.min #chatHead .lbl{display:none}#chat.min #chatHead{padding:0 16px}#emo button{width:44px;height:44px}}
 @media (max-width:860px) and (max-height:520px){#chat:not(.min){max-height:82vh}#clog{height:78px}#panel{max-height:88dvh}#emo button{width:42px;height:42px}.zoom{flex-direction:row}}
 @keyframes sheetUp{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+#vbar #vUnmute{width:auto;height:38px;border-radius:999px;padding:0 14px;font-size:12.5px;font-weight:700;background:#fff;color:#0b0c14;white-space:nowrap}#vUnmute[hidden]{display:none}
+@media (max-width:860px){#vVol{display:none}}
 </style>
 </head>
 <body>
@@ -286,7 +288,7 @@ summary{padding:0 16px;font-weight:600}summary::after{font-size:18px;color:var(-
 <div id="screen3" class="scrS" style="display:none"></div>
 <div id="screen4" class="scrS" style="display:none"></div>
 
-<div id="vbar" hidden><button id="vPlay" title="Phát / tạm dừng" aria-label="Phát / tạm dừng">❚❚</button><span id="vName"></span><span id="vTime"></span><input type="range" id="vSeek" min="0" max="1000" value="0" title="Tua"><input type="range" id="vVol" min="0" max="100" value="80" title="Âm lượng"><button id="vClose" title="Tắt video" aria-label="Tắt video">✕</button></div>
+<div id="vbar" hidden><button id="vPlay" title="Phát / tạm dừng" aria-label="Phát / tạm dừng">❚❚</button><span id="vName"></span><span id="vTime"></span><input type="range" id="vSeek" min="0" max="1000" value="0" title="Tua"><input type="range" id="vVol" min="0" max="100" value="80" title="Âm lượng"><button id="vUnmute" hidden title="Bật tiếng" aria-label="Bật tiếng">🔊 Bật tiếng</button><button id="vClose" title="Tắt video" aria-label="Tắt video">✕</button></div>
 
 <header class="bar">
   <div class="brand">
@@ -814,7 +816,7 @@ function emote(k){if(!EMO[k])return;S.emote={k,t:S.t,n:(S.emote?S.emote.n:0)+1};
 
 /* ───────── Chất lượng tự động ───────── */
 function applyQ(){const L=Q.L;renderer.setPixelRatio(L===0?Math.min(2,window.devicePixelRatio||1):L===1?1:.75);renderer.setSize(W,H,false);Q.cap=L===2?.15:1;applyDensity();showCard();
-  fixtures.forEach((f,i)=>{f.cone.visible=!(L===2&&f.type==='top'&&i%2);});}
+  fixtures.forEach((f,i)=>{f.cone.visible=!(L===2&&f.type==='top'&&i%2);});try{syncMirrorQuality();}catch(e){}}
 function tickQ(raw){Q.acc+=raw;Q.n++;if(Q.acc<1)return;Q.fps=Math.round(Q.n/Q.acc);Q.acc=0;Q.n=0;$('fps').textContent=Q.fps+' FPS'+(Q.L?' · tiết kiệm '+Q.L:'');
   if(Q.mode!=='auto')return;Q.cool--;if(Q.fps<27){Q.low++;Q.high=0;}else if(Q.fps>55){Q.high++;Q.low=0;}else{Q.low=0;Q.high=0;}
   if(Q.low>=3&&Q.L<2&&Q.cool<=0){Q.L++;Q.low=0;Q.cool=6;applyQ();}else if(Q.high>=12&&Q.L>0&&Q.cool<=0){Q.L--;Q.high=0;Q.cool=20;applyQ();}}
@@ -875,11 +877,12 @@ function handleYt(peer,q,nk){const u=typeof q.yt==='string'?q.yt.slice(0,200):nu
   if(SY.yt.get(peer)===u)return;SY.yt.set(peer,u);
   if(!u){if(SY.ytFollow===peer){clearYT();addLine('',nk+' đã tắt video.',null,{sys:true});}return;}
   const pr=parseYT(u);if(!pr||!pr.id)return;const url='https://www.youtube.com/watch?v='+pr.id;
-  const go=()=>{$('ytIn').value=url;loadYT(url,true);SY.ytFollow=peer;SY.hs=Number.isFinite(q.ys)?q.ys:null;SY.hc=Number.isFinite(q.yc)?q.yc:null;};
+  const go=gest=>{$('ytIn').value=url;const ys=Number.isFinite(q.ys)?q.ys:null,yc=Number.isFinite(q.yc)?q.yc:null,st=ys!=null?Math.max(0,(NOW()-ys)/1000):(yc!=null?yc:0),act=gest===true||!!(navigator.userActivation&&navigator.userActivation.hasBeenActive);loadYT(url,ys!=null,{mute:!act,start:st});SY.ytFollow=peer;SY.hs=ys;SY.hc=yc;};
   if($('followShow').checked&&!hasLocal){go();addLine('',nk+' đang chiếu video YouTube — bạn đang xem cùng trên màn LED.',null,{sys:true});}
-  else addLine('',nk+' đang chiếu một video YouTube.',null,{sys:true,btn:['▶ Xem cùng',go]});}
+  else addLine('',nk+' đang chiếu một video YouTube.',null,{sys:true,btn:['▶ Xem cùng',()=>go(true)]});}
 function tickFollow(dt){if(!SY.ytFollow||!ytId||ytBlocked||!$('followShow').checked)return;if((tickFollow.t=(tickFollow.t||0)+dt)<1.5)return;tickFollow.t=0;
-  if(SY.hs!=null){const tg=(NOW()-SY.hs)/1000;if(S.ytState===2||S.ytState===5||S.ytState===-1)ytCmd('playVideo');if(S.ytState===1&&tg>0&&Math.abs(YT.cur-tg)>2.5)ytCmd('seekTo',[tg,true]);}
+  if(!YT.muted&&S.ytState!==1&&S.ytState!==3&&SY.hs!=null&&!YT.retried&&Date.now()-(YT.t0||0)>5000){YT.retried=true;YT.muted=true;$('vUnmute').hidden=false;ytCmd('mute');ytCmd('playVideo');} // trình duyệt chặn phát có tiếng: chuyển sang tắt tiếng rồi tự phát
+  if(SY.hs!=null){const tg=(NOW()-SY.hs)/1000;if(S.ytState===2||S.ytState===5||S.ytState===-1)ytCmd('playVideo');if(S.ytState===1&&tg>0&&Math.abs(YT.cur-tg)>1.5)ytCmd('seekTo',[tg,true]);}
   else if(SY.hc!=null&&S.ytState===1)ytCmd('pauseVideo');}
 function syncPeers(list){const seen=new Set();let n=0,total=0;
   for(const pr of list){if(pr.kind!=='viewer')continue;total++;if(pr.sameTab)continue;const q=pr.presence||{},nk=cleanText(q.n,16)||'Khách',col=PAL[Math.abs(q.st|0)%PAL.length];
@@ -1097,8 +1100,12 @@ addEventListener('message',e=>{if(!/^https:\/\/www\.youtube(-nocookie)?\.com$/.t
 const YTERR={2:'Link video không hợp lệ.',5:'Trình duyệt không phát được video này.',100:'Video không tồn tại hoặc đã bị đặt riêng tư.',101:'Chủ video không cho phát ở trang khác — hãy chọn video khác (thường là bản lyric, fancam, live stage).',150:'Chủ video không cho phát ở trang khác — hãy chọn video khác (thường là bản lyric, fancam, live stage).',152:'YouTube từ chối nguồn phát của trang này.',153:'YouTube cần trang được mở qua địa chỉ web (http/https). Hãy mở game bằng file Mo-Concert.bat hoặc từ trang web, không mở trực tiếp file.'};
 function ytError(code){const msg=YTERR[code]||('YouTube báo lỗi '+code+'.');S.led={big:'KHÔNG PHÁT ĐƯỢC',small:msg.slice(0,60)};setTimeout(()=>{if(S.led&&S.led.big==='KHÔNG PHÁT ĐƯỢC')S.led=null;},9000);
   $('note').textContent='YouTube: '+msg;const url=ytUrl;clearYT();try{addLine('','YouTube: '+msg,null,{sys:true,btn:url?['Mở trên YouTube ↗',()=>window.open(url,'_blank','noopener')]:null});openChat();}catch(e){}}
+let ytSrc='';
+function addMirror(M){const m=document.createElement('iframe');m.allow='autoplay; encrypted-media';m.referrerPolicy='strict-origin-when-cross-origin';m.title='YouTube (màn phụ)';
+  m.addEventListener('load',()=>{try{m.contentWindow.postMessage(JSON.stringify({event:'listening',id:M.ch,channel:'widget'}),'https://www.youtube.com');}catch(e){}});m.src=ytSrc+'&mute=1&controls=0';M.el.appendChild(m);}
+function syncMirrorQuality(){if(!ytId||ytBlocked||!ytSrc)return;for(const M of MIRS)if(M.side){const has=!!M.el.firstChild;if(Q.L===2&&has){M.el.querySelector('iframe').remove();M.el.style.display='none';M.state=null;}else if(Q.L<2&&!has)addMirror(M);}}
 function dropMirrors(){for(const m of MIRS){m.el.querySelector('iframe')?.remove();m.el.style.display='none';m.state=null;m.cur=0;}}
-function clearYT(){SY.ytFollow=null;SY.anchor=null;if(!hasLocal)$('vbar').hidden=true;YT.dur=YT.cur=0;S.ytState=null;scr.querySelector('iframe')?.remove();dropMirrors();ytId=null;ytBlocked=false;scr.classList.remove('live');$('ytOpen').classList.remove('on');}
+function clearYT(){YT.muted=false;$('vUnmute').hidden=true;SY.ytFollow=null;SY.anchor=null;if(!hasLocal)$('vbar').hidden=true;YT.dur=YT.cur=0;S.ytState=null;scr.querySelector('iframe')?.remove();dropMirrors();ytId=null;ytBlocked=false;scr.classList.remove('live');$('ytOpen').classList.remove('on');}
 // video / nhạc từ máy: chiếu thẳng lên màn LED bằng texture, đèn chạy theo âm thanh thật
 const vid=document.createElement('video');vid.style.cssText='position:fixed;left:0;top:0;width:2px;height:2px;opacity:0;pointer-events:none;z-index:-1';document.body.appendChild(vid);vid.playsInline=true;vid.loop=true;vid.preload='auto';
 let vidTex=null,vidURL=null,actx=null,analyser=null,fdata=null,hasLocal=false,tapNode=null,tapFor=null,vidIsVideo=false;
@@ -1133,18 +1140,16 @@ $('vVol').addEventListener('input',e=>{vid.volume=e.target.value/100;if(!hasLoca
 $('vPlay').onclick=()=>{if(hasLocal){try{actx&&actx.resume();}catch(e){}vid.paused?vid.play().catch(()=>{}):vid.pause();}else if(ytId)ytCmd(S.ytState===1?'pauseVideo':'playVideo');};$('vClose').onclick=()=>{hasLocal?closeVid():clearYT();};
 function parseYT(s){s=s.trim();let m=s.match(/(?:v=|youtu\.be\/|shorts\/|live\/|embed\/)([\w-]{11})/);const l=s.match(/[?&]list=([\w-]+)/);
   if(!m&&/^[\w-]{11}$/.test(s))m=[0,s];return m||l?{id:m&&m[1],list:l&&l[1]}:null;}
-function loadYT(s,auto){const p=parseYT(s);const inp=$('ytIn');
+function loadYT(s,auto,opt){opt=opt||{};const p=parseYT(s);const inp=$('ytIn');
   if(!p){inp.value='';inp.placeholder='Link chưa đúng — dán link dạng youtube.com/watch?v=…';return;}
   closeVid();ytId=p.id||p.list;ytBlocked=false;
   ytUrl=p.id?`https://www.youtube.com/watch?v=${p.id}${p.list?'&list='+p.list:''}`:`https://www.youtube.com/playlist?list=${p.list}`;
-  const q=new URLSearchParams({autoplay:auto?1:0,playsinline:1,rel:0,modestbranding:1,enablejsapi:1});if(/^https?:/.test(location.protocol))q.set('origin',location.origin);S.ytState=null;if(p.list)q.set('list',p.list);
+  const q=new URLSearchParams({autoplay:auto?1:0,playsinline:1,rel:0,modestbranding:1,enablejsapi:1});if(/^https?:/.test(location.protocol))q.set('origin',location.origin);S.ytState=null;if(p.list)q.set('list',p.list);if(opt.mute)q.set('mute','1');if(opt.start>0)q.set('start',String(Math.floor(opt.start)));YT.muted=!!opt.mute;YT.t0=Date.now();YT.retried=false;$('vUnmute').hidden=!opt.mute;
   const src=p.id?`https://www.youtube.com/embed/${p.id}?${q}`:`https://www.youtube.com/embed/videoseries?${q}`;
   scr.querySelector('iframe')?.remove();
   const f=document.createElement('iframe');f.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';f.referrerPolicy='strict-origin-when-cross-origin';
   f.title='YouTube';f.addEventListener('load',()=>{try{f.contentWindow.postMessage(JSON.stringify({event:'listening',id:1,channel:'widget'}),'https://www.youtube.com');}catch(e){}});f.src=src;scr.appendChild(f);
-  dropMirrors();for(const M of MIRS){if(M.side&&COARSE)continue; // điện thoại: bỏ hai màn bên cho nhẹ máy
-    const m=document.createElement('iframe');m.allow='autoplay; encrypted-media';m.referrerPolicy='strict-origin-when-cross-origin';m.title='YouTube (màn phụ)';
-    m.addEventListener('load',()=>{try{m.contentWindow.postMessage(JSON.stringify({event:'listening',id:M.ch,channel:'widget'}),'https://www.youtube.com');}catch(e){}});m.src=src+'&mute=1&controls=0';M.el.appendChild(m);}$('vName').textContent='YouTube';$('vPlay').textContent=auto?'❚❚':'▶';$('vSeek').value=0;$('vbar').hidden=false;scr.classList.add('live');idle.style.display='none';
+  ytSrc=src;dropMirrors();for(const M of MIRS)if(!(M.side&&Q.L===2))addMirror(M);$('vName').textContent='YouTube';$('vPlay').textContent=auto?'❚❚':'▶';$('vSeek').value=0;$('vbar').hidden=false;scr.classList.add('live');idle.style.display='none';
   const o=$('ytOpen');o.href=ytUrl;o.classList.add('on');
   try{localStorage.setItem('mdsim.yt',s);}catch(e){}
   if(location.protocol==='file:')$('note').textContent='Bạn đang mở file trực tiếp nên YouTube sẽ báo lỗi 153. Hãy mở game bằng file Mo-Concert.bat (đi kèm trong gói) để xem YouTube ngay trên màn LED.';
@@ -1152,6 +1157,8 @@ function loadYT(s,auto){const p=parseYT(s);const inp=$('ytIn');
 function ytFail(){if(ytBlocked||!ytId)return;ytBlocked=true;scr.querySelector('iframe')?.remove();dropMirrors();scr.classList.remove('live');scr.style.display='none';
   $('note').textContent='Khung xem này không cho nhúng video YouTube. Bấm "Mở YouTube ↗" ở thanh trên để nghe ở tab khác, hoặc dùng "Tải video" để chiếu thẳng lên màn LED.';}
 document.addEventListener('securitypolicyviolation',e=>{if(/frame|child|default/.test(e.violatedDirective||'')&&/youtube/.test(e.blockedURI||''))ytFail();});
+function unmuteYT(){if(!YT.muted||!ytId||hasLocal)return;YT.muted=false;$('vUnmute').hidden=true;ytCmd('unMute');ytCmd('setVolume',[+$('vVol').value]);}
+$('vUnmute').onclick=unmuteYT;for(const ev of['pointerdown','keydown','touchend'])addEventListener(ev,unmuteYT,true);
 $('ytForm').addEventListener('submit',e=>{e.preventDefault();SY.ytFollow=null;SY.anchor=null;loadYT($('ytIn').value,true);$('ytIn').blur();});
 
 /* ───────── UI ───────── */
@@ -1235,7 +1242,7 @@ try{const s=+localStorage.getItem('mdsim.stick');if(s>0&&s<PAL.length)setStick(s
   const lk=JSON.parse(localStorage.getItem('mdsim.look')||'null');if(lk&&PRESET[lk.gender])S.look=Object.assign({},PRESET[lk.gender],lk);const nk=localStorage.getItem('mdsim.nick');if(nk){S.nick=nk.slice(0,16);$('nick').value=S.nick;}const sh=+localStorage.getItem('mdsim.shape');if(sh>0&&sh<4)setShape(sh);
   const y=localStorage.getItem('mdsim.yt');if(y){$('ytIn').value=y;loadYT(y,false);}}catch(e){}
 rebuildChar();setNick(S.nick);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>setNick(S.nick));
-window.__sim={ledHole,ledMain,fohMesh,sendChat,joinCode,Q,joy,AUD,peersMap,emote,startShow,vid,keys,S,me,cam,zones,goZone,overview,perf};
+window.__sim={ledHole,ledMain,fohMesh,sendChat,joinCode,Q,joy,AUD,peersMap,emote,startShow,vid,keys,S,me,cam,zones,goZone,overview,perf,loadYT,handleYt,SY,YT,MIRS};
 // một lỗi lẻ không được làm đứng cả game: báo ra khung chat rồi chạy tiếp
 function loopErr(e){if(loopErr.n)return;loopErr.n=1;try{addLine('','Lỗi khi dựng hình: '+String((e&&e.message)||e).slice(0,140),null,{sys:true});openChat();}catch(x){}}
 let last=performance.now();
