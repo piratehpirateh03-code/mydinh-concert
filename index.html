@@ -413,6 +413,13 @@ body.guest #menuBtn{margin-left:auto}
 .tkown{padding:8px 10px;border-radius:10px;margin-bottom:8px;font-size:12.5px;background:linear-gradient(135deg,#fff3b0,#ffd84a 45%,#e29a00);color:#2c1c00;font-weight:700}
 .tkown[hidden]{display:none}
 .tkrow{display:flex;gap:8px;margin:8px 0}.tkrow>*{flex:1}
+#memList .pr{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px}
+#memList .pn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#memList .pn.ul{color:#ffd84a;font-weight:700}
+#memList em,#plSec summary em{font-style:normal;font-size:11px;color:#ffd84a}
+#memList button{min-height:34px;border:1px solid var(--line);background:rgba(255,255,255,.08);color:var(--ink);border-radius:999px;padding:4px 11px;font-size:12px}#memList button.arm{background:#ffd84a;color:#1b1500;border-color:#ffd84a}
+.cl .ub{font-style:normal;font-size:10px;font-weight:800;letter-spacing:.04em;color:#2c1c00;background:linear-gradient(135deg,#fff3b0,#ffd84a 50%,#e29a00);border-radius:5px;padding:1px 5px;margin-right:5px;vertical-align:1px}
+.cl.ult{border-left:3px solid #ffd84a;padding-left:6px;background:linear-gradient(90deg,rgba(255,216,74,.16),transparent)}
+.cl.win{color:#fff3b0;font-style:normal;font-weight:700;font-size:12.5px;padding:5px 8px;border-radius:8px;background:linear-gradient(135deg,rgba(255,216,74,.32),rgba(226,154,0,.16));border:1px solid rgba(255,216,74,.55)}
 @media (prefers-reduced-motion:reduce){.tkgold i,.tkgo.live,.tkconf b{animation:none}}
 @media (max-width:480px){.tkbig{font-size:46px}.tkcode{font-size:40px}}
 </style>
@@ -500,9 +507,10 @@ body.guest #menuBtn{margin-left:auto}
   <div class="tiers" id="tiers"></div>
   <button class="btn wide" id="labelBtn">🏷 Hiện tên khu trên sân</button>
   </div></details>
+  <details open id="plSec"><summary>👥 Người trong phòng <em id="plCnt">1</em></summary><div class="dbody"><div id="memList"></div><div class="opt2">Chủ phòng bấm "Trao quyền" để nhường quyền điều khiển nhạc, hiệu ứng và khán giả cho người khác.</div></div></details>
   <details id="tkSec" class="lockable"><summary>🎟 Giành vé Ultimate</summary><div class="dbody"><p class="lockmsg">🔒 Chỉ chủ phòng hẹn giờ phiên vé; đến giờ bạn vẫn được mời tham gia.</p>
   <div class="tkown" id="tkOwn" hidden>🎫 Bạn đã sở hữu Vé Vàng Ultimate · mã <b id="tkMyCode"></b></div>
-  <div class="opt2">Hẹn giờ thật (theo đồng hồ thực) cho một phiên bán vé mô phỏng: chỉ 50 vé Ultimate, khoảng 10.000 tài khoản ảo (có cả nhóm săn vé và tool rất nhanh) cùng mọi người chơi thật trong phòng tranh nhau. Về đích trong top 50 sẽ nhận vé vàng, có logo nổi bật ở mọi phòng.</div>
+  <div class="opt2">Hẹn giờ thật (theo đồng hồ thực) cho một phiên bán vé mô phỏng: chỉ 30 vé Ultimate, khoảng 10.000 tài khoản ảo (có cả nhóm săn vé và tool rất nhanh) cùng mọi người chơi thật trong phòng tranh nhau. Về đích trong top 30 sẽ nhận vé vàng, có logo nổi bật ở mọi phòng.</div>
   <div class="tkrow"><input type="datetime-local" id="tkTime" class="sel" aria-label="Ngày giờ mở bán vé (giờ thật)"><button class="btn" id="tkSet">Hẹn giờ</button></div>
   <div class="seg" id="tkLv"><button data-v="easy">Dễ</button><button data-v="std" class="on">Thường</button><button data-v="hard">Như thật</button></div>
   <div class="tkrow"><button class="btn" id="tk30">Thử sau 30 giây</button><button class="btn" id="tkCancel">Huỷ hẹn</button></div>
@@ -537,7 +545,7 @@ body.guest #menuBtn{margin-left:auto}
   <button class="tkx" id="tkX" aria-label="Đóng">✕</button>
   <div class="tkbrand">BIGBANG &lt;XX : COSMOS&gt; · Mỹ Đình<em>MÔ PHỎNG</em></div>
   <h2 id="tkH">Vé ULTIMATE</h2>
-  <div id="tkHud" hidden><span id="tkTm">0,00s</span><span id="tkLeft">Đang tranh: 10.000</span><span>Vé còn: <b id="tkStock">50</b></span></div>
+  <div id="tkHud" hidden><span id="tkTm">0,00s</span><span id="tkLeft">Đang tranh: 10.000</span><span>Vé còn: <b id="tkStock">30</b></span></div>
   <div id="tkBody"></div>
   <div id="tkFeed" aria-hidden="true"></div>
 </div></div>
@@ -1058,8 +1066,8 @@ function showBubble(b,text){const x=b.c.getContext('2d');x.clearRect(0,0,512,128
 const myBubble=mkBubble(hero,74);
 // khung chat
 const clog=$('clog');
-function addLine(name,text,col,o={}){const d=document.createElement('div');d.className='cl'+(o.sys?' sys':'');
-  if(o.sys)d.textContent=text;else{const b=document.createElement('b');b.textContent=name+':';b.style.color=col||'#ffd84a';d.appendChild(b);d.appendChild(document.createTextNode(' '+text));}
+function addLine(name,text,col,o={}){const d=document.createElement('div');d.className='cl'+(o.sys?' sys':'')+(o.win?' win':'')+(o.ult?' ult':'');
+  if(o.sys)d.textContent=text;else{if(o.ult){const g=document.createElement('i');g.className='ub';g.textContent='🎫 ULTIMATE';d.appendChild(g);}const b=document.createElement('b');b.textContent=name+':';b.style.color=col||'#ffd84a';d.appendChild(b);d.appendChild(document.createTextNode(' '+text));}
   if(o.btn){const bt=document.createElement('button');bt.type='button';bt.textContent=o.btn[0];bt.onclick=o.btn[1];d.appendChild(bt);}
   const atEnd=clog.scrollTop+clog.clientHeight>=clog.scrollHeight-8;clog.appendChild(d);while(clog.children.length>80)clog.firstChild.remove();if(atEnd)clog.scrollTop=clog.scrollHeight;
   if($('chat').classList.contains('min')&&!o.sys){unread++;$('chatCount').textContent=unread;}}
@@ -1067,7 +1075,7 @@ function openChat(){$('chat').classList.remove('min');unread=0;$('chatCount').te
 function sendChat(raw){const text=cleanText(raw,120);if(!text||S.t-CH.last<.6)return false;CH.last=S.t;
   if(!RM)addLine('','Chưa vào được phòng chung nên tin nhắn chỉ hiện trên máy bạn.',null,{sys:true});
   CH.mine.push({i:++CH.seq,t:Date.now(),x:text});if(CH.mine.length>4)CH.mine.shift();
-  addLine((S.nick.trim()||'Bạn')+' (bạn)',text,PAL[S.stick]);showBubble(myBubble,text);forceNet=true;return true;}
+  addLine((S.nick.trim()||'Bạn')+' (bạn)',text,PAL[S.stick],{ult:!!S.ult});showBubble(myBubble,text);forceNet=true;return true;}
 // nhân vật của người khác
 function mkPeer(){const g=new THREE.Group();scene.add(g);const c=document.createElement('canvas');c.width=512;c.height=96;const t=new THREE.CanvasTexture(c);
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false,fog:false}));sp.scale.set(52,9.8,1);sp.position.y=50;g.add(sp);
@@ -1076,7 +1084,7 @@ function mkPeer(){const g=new THREE.Group();scene.add(g);const c=document.create
   return{g,c,t,bm,stk,bub:mkBubble(g,64),gs:(()=>{const s=mkGold(67);g.add(s);return s;})(),char:null,key:'',nick:null,x:0,z:0,tx:0,tz:0,rot:0,init:false};}
 function handleChat(peer,q,nk,col){const arr=Array.isArray(q.m)?q.m.slice(-4):[];let last=seenMsg.get(peer);const first=last===undefined;if(first)last=0;
   for(const m of arr){if(!m||typeof m!=='object')continue;const id=m.i|0;if(id<=last)continue;last=id;const tx=cleanText(m.x,120);if(!tx)continue;
-    if(first&&!(Number.isFinite(m.t)&&Date.now()-m.t<300000))continue;addLine(nk,tx,col);const p=peersMap.get(peer);if(p&&!first)showBubble(p.bub,tx);}
+    if(first&&!(Number.isFinite(m.t)&&Date.now()-m.t<300000))continue;addLine(nk,tx,col,{ult:!!q.u});const p=peersMap.get(peer);if(p&&!first)showBubble(p.bub,tx);}
   seenMsg.set(peer,last);}
 function handleShow(peer,q,nk){const sh=q.sh&&typeof q.sh==='object'&&Number.isFinite(q.sh.s)&&Number.isFinite(q.sh.k)?q.sh:null;
   if(S.show&&S.show.f===peer&&(!sh||sh.s!==S.show.fs)){stopShow();SY.ignore=null;addLine('',nk+' đã dừng show.',null,{sys:true});}
@@ -1114,7 +1122,7 @@ function updatePeers(dt,t){for(const p of peersMap.values()){const dx=p.tx-p.x,d
   heroGold.visible=!!S.ult&&cam.mode!=='fp';heroGold.position.y=73+Math.sin(t*2)*1.2;myBubble.sp.visible=S.t<myBubble.until&&cam.mode!=='fp';}
 function tickNet(dt){if(!RM||INTRO.on)return;netT+=dt;if(netT<.1&&!forceNet)return;netT=0;forceNet=false;
   const o={x:Math.round(me.x),z:Math.round(me.y),r:+me.rot.toFixed(2),zone:me.zone.label,n:S.nick.slice(0,16),lk:S.look,st:S.stick,m:CH.mine,
-    sh:S.show&&!S.show.f?{s:S.show.at,k:+S.show.k.toFixed(4)}:null,yt:null,ys:null,yc:null,j:ROOM.j,u:S.ult?1:0,tk:ROOM.host&&TK.at?{a:TK.at,l:TK.lv,s:TK.sd}:null,tw:TK.on&&TK.at?TK.at:null,tr:TK.resA?{a:TK.resA,t:TK.resT,w:TK.resW?1:0}:null,
+    sh:S.show&&!S.show.f?{s:S.show.at,k:+S.show.k.toFixed(4)}:null,yt:null,ys:null,yc:null,j:ROOM.j,u:S.ult?1:0,tx:(ROOM.tx&&ROOM.host&&performance.now()-ROOM.txAt<8000)?ROOM.tx:null,tk:ROOM.host&&TK.at?{a:TK.at,l:TK.lv,s:TK.sd}:null,tw:TK.on&&TK.at?TK.at:null,tr:TK.resA?{a:TK.resA,t:TK.resT,w:TK.resW?1:0}:null,
     pl:ROOM.host&&ROOM.pl.length?ROOM.pl:null,pi:ROOM.host?ROOM.pi:null,rm:ROOM.host?S.mode:null,rl:ROOM.host?(S.lightsOn?1:0):null,rd:ROOM.host?S.dens:null,rc:ROOM.host?S.crowd:null,rf:ROOM.host?(ROOM.rf|0):null};
   if(ROOM.host&&ytId&&!hasLocal&&ytUrl&&!ytBlocked&&!SY.ytFollow){o.yt=ytUrl;if(S.ytState===1||(S.ytState===3&&SY.anchor!=null)){const a=NOW()-YT.cur*1000;if(SY.anchor==null||Math.abs(a-SY.anchor)>800)SY.anchor=Math.round(a);o.ys=SY.anchor;}else{SY.anchor=null;o.yc=Math.round(YT.cur);}}
   const j=JSON.stringify(o);
@@ -1160,7 +1168,7 @@ function refreshHost(){let best=null;const cand=(j,id)=>{if(!Number.isFinite(j))
   const am=!RM||!best||best.id==='~me',hp=am?null:best.id,was=ROOM.host,hpWas=ROOM.hostPeer;ROOM.hostPeer=hp;
   if(am!==was||hp!==hpWas){ROOM.host=am;
     if(am&&!was){SY.ytFollow=null;SY.anchor=null;ROOM.rf=ROOM.rf0||0;}
-    if(!am){SY.yt.clear();SY.hs=SY.hc=null;ROOM.rf0=undefined;if(was)SY.ytFollow=null;}
+    if(!am){ROOM.tx=null;SY.yt.clear();SY.hs=SY.hc=null;ROOM.rf0=undefined;if(was)SY.ytFollow=null;}
     document.body.classList.toggle('guest',!am&&!INTRO.on);renderPL();roomUI();
     if(!INTRO.on&&(am!==was||(!am&&hp!==hpWas)))announceHost();}}
 function hostName(){if(ROOM.host)return S.nick.trim()||'Bạn';const pr=(ROOM.peers||[]).find(p=>p.peer===ROOM.hostPeer);return cleanText(pr&&pr.presence&&pr.presence.n,16)||'Chủ phòng';}
@@ -1627,7 +1635,7 @@ renderPL();roomUI();
 /* ───────── Giành vé Ultimate: 200 vé, ~10.000 tài khoản ảo cùng người chơi thật trong phòng, theo giờ thật ───────── */
 const TK={at:0,lv:'std',sd:0,rem:0,done:0,on:false,open:false,auto:false,st:'',t0:0,pen:0,bots:null,raf:0,feedT:0,cap:'',ent:'',msg:'',th:0,rt:[],real:0,resA:0,resT:0,resW:0,seen:new Set()};
 const TKLV={easy:{f:[6.2,8.4],n:'Dễ'},std:{f:[4.8,6.5],n:'Thường'},hard:{f:[3.5,4.5],n:'Như thật'}};
-const TKN=10000,TKT=50,fmtN=n=>Math.round(n).toLocaleString('vi-VN'),pad2=n=>String(n).padStart(2,'0'),sec2=x=>x.toFixed(2).replace('.',',');
+const TKN=10000,TKT=30,fmtN=n=>Math.round(n).toLocaleString('vi-VN'),pad2=n=>String(n).padStart(2,'0'),sec2=x=>x.toFixed(2).replace('.',',');
 const fmtCd=ms=>{const s=Math.max(0,Math.ceil(ms/1000)),h=Math.floor(s/3600);return(h?h+':':'')+pad2(Math.floor(s%3600/60))+':'+pad2(s%60);};
 const fmtClk=ms=>{const d=new Date(ms),t=pad2(d.getHours())+':'+pad2(d.getMinutes())+':'+pad2(d.getSeconds());return new Date().toDateString()===d.toDateString()?t:t+' ngày '+pad2(d.getDate())+'/'+pad2(d.getMonth()+1);};
 const locIso=ms=>{const d=new Date(ms);return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())+'T'+pad2(d.getHours())+':'+pad2(d.getMinutes());};
@@ -1671,7 +1679,7 @@ function tkWin(th){TK.st='res';const rank=1+tkCnt(th);
   TK.resW=1;forceNet=true;setNick(S.nick);tkOwn();$('tkHud').hidden=true;$('tkFeed').style.display='none';
   const cf=Array.from({length:44},(_,i)=>`<b style="left:${(Math.random()*100).toFixed(1)}%;background:${['#ffd84a','#fff3b0','#ff5c8a','#6ad8ff','#b7ff6a'][i%5]};animation-delay:${(Math.random()*.9).toFixed(2)}s"></b>`).join('');
   TKb.innerHTML=`<div class="tkres win"><div class="tkconf">${cf}</div><div class="tkgold"><i></i><div class="tkg1">GOLDEN TICKET · ${String(rank).padStart(3,'0')}/${TKT}</div><div class="tkg2">ULTIMATE</div><div class="tkg3" id="tkWn"></div><div class="tkg4">STANDING · MỸ ĐÌNH · XX : COSMOS</div><div class="tkg5">${S.ult.c}</div></div><h3>Bạn đã giành được vé!</h3><p>Hạng <b>#${fmtN(rank)}</b> trong ${TKT} vé Ultimate, thời gian ${sec2(th)}s. Logo vé vàng sẽ hiện trên đầu bạn ở mọi phòng.</p><button class="tkgo" id="tkClose">Vào sân khấu</button></div>`;
-  $('tkWn').textContent=(S.nick.trim()||'Bạn');$('tkClose').onclick=tkClose;addLine('','🎫 Bạn đã giành Vé Vàng Ultimate (hạng #'+rank+'/'+TKT+')! Logo vé vàng đã được gắn lên nhân vật.',null,{sys:true});}
+  $('tkWn').textContent=(S.nick.trim()||'Bạn');$('tkClose').onclick=tkClose;addLine('','🎫 Bạn đã giành Vé Vàng Ultimate (hạng #'+rank+'/'+TKT+')! Logo vé vàng đã được gắn lên nhân vật.',null,{sys:true,win:true});}
 function tkOpen(){if(TK.raf)cancelAnimationFrame(TK.raf);TK.on=true;TK.open=false;TK.pen=0;TK.bots=null;TK.msg='';TK.feedT=0;TK.resA=0;TK.resW=0;$('tkFeed').textContent='';clearKeys();forceNet=true;
   $('tk').hidden=false;document.body.classList.add('tkon');tkWait();TK.raf=requestAnimationFrame(tkLoop);}
 function tkClose(){if(TK.raf)cancelAnimationFrame(TK.raf);TK.raf=0;const was=TK.open;TK.on=false;$('tk').hidden=true;document.body.classList.remove('tkon');if(was)TK.done=TK.at;forceNet=true;tkTick();}
@@ -1704,8 +1712,26 @@ function tkPeers(list){let real=0;const rt=[];
   for(const pr of list){if(pr.kind!=='viewer'||pr.sameTab)continue;const q=pr.presence||{},r=q.tr;
     if(TK.at&&q.tw===TK.at)real++;
     if(TK.at&&r&&r.a===TK.at&&Number.isFinite(r.t)&&r.t>.3&&r.t<300)rt.push(r.t);
-    if(r&&r.w&&Number.isFinite(r.a)&&Math.abs(NOW()-r.a)<180000){const k=pr.peer+'|'+r.a;if(!TK.seen.has(k)){TK.seen.add(k);addLine('','🎫 '+(cleanText(q.n,16)||'Khách')+' vừa giành vé vàng Ultimate (về đích '+sec2(+r.t)+'s)!',null,{sys:true});}}}
+    if(r&&r.w&&Number.isFinite(r.a)&&Math.abs(NOW()-r.a)<180000){const k=pr.peer+'|'+r.a;if(!TK.seen.has(k)){TK.seen.add(k);addLine('','🎫 '+(cleanText(q.n,16)||'Khách')+' vừa giành vé vàng Ultimate (về đích '+sec2(+r.t)+'s)!',null,{sys:true,win:true});}}}
   TK.rt=rt;TK.real=real;}
+// danh sách người trong phòng và trao quyền chủ phòng: chủ phòng đặt tx=<id người nhận>, người nhận hạ j của mình xuống thấp nhất để trở thành chủ phòng
+function hostXfer(list){const me=list.find(p=>p.sameTab),hp=ROOM.hostPeer&&list.find(p=>p.peer===ROOM.hostPeer);
+  if(!me||!hp||ROOM.host||(hp.presence||{}).tx!==me.peer)return;
+  let mn=Infinity;for(const p of list){const j=+((p.presence||{}).j);if(p.kind==='viewer'&&!p.sameTab&&Number.isFinite(j)&&j<mn)mn=j;}
+  if(Number.isFinite(mn)&&(!Number.isFinite(ROOM.j)||ROOM.j>=mn)){ROOM.j=Math.floor(mn)-1;forceNet=true;refreshHost();}}
+let plSig='';
+function plRender(list){const box=$('memList');if(!box)return;
+  const rows=list.filter(p=>p.kind==='viewer').map(p=>({id:p.peer,me:!!p.sameTab,n:cleanText((p.presence||{}).n,16)||'Khách',u:(p.presence||{}).u?1:0,h:p.sameTab?!!ROOM.host:p.peer===ROOM.hostPeer}));
+  if(!rows.some(r=>r.me))rows.push({id:'~me',me:true,n:S.nick.trim()||'Bạn',u:S.ult?1:0,h:!!ROOM.host});
+  rows.sort((a,b)=>(b.h-a.h)||(b.me-a.me)||a.n.localeCompare(b.n));
+  const sig=JSON.stringify(rows)+ROOM.host;if(sig===plSig)return;plSig=sig;$('plCnt').textContent=rows.length;box.textContent='';
+  for(const r of rows){const d=document.createElement('div');d.className='pr';const nm=document.createElement('span');nm.className='pn'+(r.u?' ul':'');nm.textContent=(r.u?'★ ':'')+r.n+(r.me?' (bạn)':'');d.appendChild(nm);
+    if(r.h){const t=document.createElement('em');t.textContent='👑 Chủ phòng';d.appendChild(t);}
+    else if(ROOM.host&&!r.me){const b=document.createElement('button');b.type='button';b.textContent='Trao quyền';let armed=0;
+      b.onclick=()=>{if(!armed){armed=1;b.textContent='Chắc chắn?';b.classList.add('arm');setTimeout(()=>{armed=0;b.textContent='Trao quyền';b.classList.remove('arm');},3000);return;}
+        ROOM.tx=r.id;ROOM.txAt=performance.now();forceNet=true;b.disabled=true;b.textContent='Đang trao…';addLine('','Đã trao quyền chủ phòng cho '+r.n+'.',null,{sys:true});};d.appendChild(b);}
+    box.appendChild(d);}}
+setInterval(()=>{try{hostXfer(ROOM.peers||[]);plRender(ROOM.peers||[]);}catch(e){}},500);plRender([]);
 $('tkSet').onclick=()=>{const v=$('tkTime').value,t=v?new Date(v).getTime():NaN;if(!Number.isFinite(t)||t<NOW()+5000){$('tkSt').textContent='Hãy chọn ngày giờ trong tương lai (theo giờ thật).';return;}tkSched(t);};
 $('tk30').onclick=()=>tkSched(NOW()+30000);
 $('tkCancel').onclick=()=>{if(!ROOM.host)return;TK.at=0;TK.auto=false;tkSave();forceNet=true;tkTick();};
@@ -1719,7 +1745,7 @@ tkLoad();[...$('tkLv').children].forEach(c=>c.classList.toggle('on',c.dataset.v=
 if(S.ult){tkOwn();setNick(S.nick);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>setNick(S.nick));}
 if(TK.at)$('tkTime').value=locIso(TK.at);
 setInterval(tkTick,500);tkTick();
-window.__sim={TK,tkOpen,tkBots,tkLB,tkClose,tkCnt,tkKth,tkPeers,tkRemote,tkSched,YTS,ytSearch,ROOM,plAdd,plPlay,plNext,renderPL,refreshHost,INTRO,ledHole,ledMain,fohMesh,sendChat,joinCode,Q,joy,AUD,peersMap,emote,startShow,vid,keys,S,me,cam,zones,goZone,overview,perf,loadYT,handleYt,SY,YT,MIRS};
+window.__sim={TK,tkOpen,tkBots,tkLB,tkClose,tkCnt,tkKth,tkPeers,tkRemote,tkSched,plRender,hostXfer,YTS,ytSearch,ROOM,plAdd,plPlay,plNext,renderPL,refreshHost,INTRO,ledHole,ledMain,fohMesh,sendChat,joinCode,Q,joy,AUD,peersMap,emote,startShow,vid,keys,S,me,cam,zones,goZone,overview,perf,loadYT,handleYt,SY,YT,MIRS};
 // một lỗi lẻ không được làm đứng cả game: báo ra khung chat rồi chạy tiếp
 function loopErr(e){if(loopErr.n)return;loopErr.n=1;try{addLine('','Lỗi khi dựng hình: '+String((e&&e.message)||e).slice(0,140),null,{sys:true});openChat();}catch(x){}}
 let last=performance.now();
