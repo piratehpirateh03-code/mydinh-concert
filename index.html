@@ -820,16 +820,17 @@ for(const x of[466,1134])add(new THREE.Mesh(new THREE.BoxGeometry(12,256,12),dar
 // LED chính (texture động) + LED cánh
 // màn LED chính 32 m × 18 m (16:9), đáy cao hơn sàn sân khấu; hai màn LED phụ 21 m × 12 m ở hai bên
 // màn LED chính tràn viền hết bề ngang sân khấu; video đặt ở giữa theo tỉ lệ 16:9, hai bên là phần nền mở rộng từ chính hình ảnh đó
-const LED={x0:482,x1:1118,y0:48,y1:248,z:252},LCY=148,CEN={w:200*16/9};CEN.x0=800-CEN.w/2;CEN.x1=800+CEN.w/2;
+// màn LED chính 16:9 vừa với chiều cao phông sân khấu, đặt giữa; video lấp kín màn, không cắt, không viền mờ hai bên
+const LED={x0:800-176,x1:800+176,y0:50,y1:248,z:252},LCY=149,CEN={w:352};CEN.x0=800-CEN.w/2;CEN.x1=800+CEN.w/2;
 const ledC=document.createElement('canvas');ledC.width=640;ledC.height=360;const ledX=ledC.getContext('2d');const ledT=new THREE.CanvasTexture(ledC);
 const ledMat=new THREE.MeshBasicMaterial({map:ledT,fog:false});
 const holeMat=new THREE.MeshBasicMaterial({color:0x000000,opacity:0,blending:THREE.NoBlending,fog:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-8});
 // "lỗ" trong ảnh 3D: ghi alpha = 0 nên video YouTube nằm phía sau hiện ra đúng mặt màn, vật phía trước vẫn che lên bình thường
-const wallC=document.createElement('canvas');wallC.width=1280;wallC.height=402;const wallX=wallC.getContext('2d'),wallT=new THREE.CanvasTexture(wallC);wallT.minFilter=THREE.LinearFilter;wallT.generateMipmaps=false;
+const wallC=document.createElement('canvas');wallC.width=1280;wallC.height=720;const wallX=wallC.getContext('2d'),wallT=new THREE.CanvasTexture(wallC);wallT.minFilter=THREE.LinearFilter;wallT.generateMipmaps=false;
 const tinyC=document.createElement('canvas');tinyC.width=48;tinyC.height=16;const tinyX=tinyC.getContext('2d');
 const CW=Math.round(1280*CEN.w/636),cenC=document.createElement('canvas');cenC.width=CW;cenC.height=402;const cenX=cenC.getContext('2d');
 const cenG=cenX.createLinearGradient(0,0,CW,0);cenG.addColorStop(0,'rgba(0,0,0,0)');cenG.addColorStop(.07,'#000');cenG.addColorStop(.93,'#000');cenG.addColorStop(1,'rgba(0,0,0,0)');
-function drawWall(src,sw,sh,cover){try{if(cover){const k=Math.max(1280/sw,402/sh),dw=sw*k,dh=sh*k;wallX.globalCompositeOperation='source-over';wallX.drawImage(src,(1280-dw)/2,(402-dh)/2,dw,dh);wallT.needsUpdate=true;return;}tinyX.drawImage(src,0,0,48,16);wallX.globalCompositeOperation='source-over';wallX.drawImage(tinyC,0,0,1280,402);wallX.fillStyle='rgba(0,0,0,.4)';wallX.fillRect(0,0,1280,402);
+function drawWall(src,sw,sh,cover){try{if(true){const k=Math.max(1280/sw,720/sh),dw=sw*k,dh=sh*k;wallX.fillStyle='#000';wallX.fillRect(0,0,1280,720);wallX.globalCompositeOperation='source-over';wallX.drawImage(src,(1280-dw)/2,(720-dh)/2,dw,dh);wallT.needsUpdate=true;return;}tinyX.drawImage(src,0,0,48,16);wallX.globalCompositeOperation='source-over';wallX.drawImage(tinyC,0,0,1280,402);wallX.fillStyle='rgba(0,0,0,.4)';wallX.fillRect(0,0,1280,402);
   const k=Math.min(CW/sw,402/sh),dw=sw*k,dh=sh*k;cenX.globalCompositeOperation='source-over';cenX.clearRect(0,0,CW,402);cenX.fillStyle='#000';cenX.fillRect(0,0,CW,402);cenX.drawImage(src,(CW-dw)/2,(402-dh)/2,dw,dh);
   cenX.globalCompositeOperation='destination-in';cenX.fillStyle=cenG;cenX.fillRect(0,0,CW,402);cenX.globalCompositeOperation='source-over';wallX.drawImage(cenC,(1280-CW)/2,0);wallT.needsUpdate=true;}catch(e){}}
 const wallMat=new THREE.MeshBasicMaterial({map:wallT,fog:false});
@@ -838,7 +839,7 @@ ledMain.renderOrder=-2;const ledHole=add(new THREE.Mesh(new THREE.PlaneGeometry(
 // khung viền màn
 // lưới điểm ảnh LED nhìn gần
 const gridTex=(()=>{const c=document.createElement('canvas');c.width=c.height=8;const x=c.getContext('2d');x.fillStyle='rgba(0,0,0,.55)';x.fillRect(0,7,8,1);x.fillRect(7,0,1,8);
-  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(190,60);t.magFilter=THREE.NearestFilter;t.anisotropy=4;return t;})();
+  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(106,60);t.magFilter=THREE.NearestFilter;t.anisotropy=4;return t;})();
 const gridMat=new THREE.MeshBasicMaterial({map:gridTex,transparent:true,depthWrite:false,fog:false});add(new THREE.Mesh(new THREE.PlaneGeometry(LED.x1-LED.x0,LED.y1-LED.y0),gridMat),800,LCY,LED.z+.6);
 // ánh sáng hắt ra từ màn LED
 // màn LED phụ phía sau FOH, quay về khán giả phía sau sân
@@ -846,7 +847,7 @@ const FOHS={x0:LED.x0,x1:LED.x1,y0:56,y1:56+(LED.y1-LED.y0),z:1414},FCY=(FOHS.y0
 {const bk=new THREE.Mesh(new THREE.BoxGeometry(FW+12,FH+12,8),dark);bk.position.set(800,FCY,FOHS.z-5);scene.add(bk);
  for(const lx of[FOHS.x0+40,800,FOHS.x1-40]){const leg=new THREE.Mesh(new THREE.BoxGeometry(10,FOHS.y0,10),dark);leg.position.set(lx,FOHS.y0/2,FOHS.z-6);scene.add(leg);const ft=new THREE.Mesh(new THREE.BoxGeometry(30,6,30),dark);ft.position.set(lx,3,FOHS.z-6);scene.add(ft);}}
 const fohMesh=add(new THREE.Mesh(new THREE.PlaneGeometry(FW,FH),wallMat),800,FCY,FOHS.z);
-{const gt=gridTex.clone();gt.needsUpdate=true;gt.repeat.set(190,60);add(new THREE.Mesh(new THREE.PlaneGeometry(FW,FH),new THREE.MeshBasicMaterial({map:gt,transparent:true,depthWrite:false,fog:false})),800,FCY,FOHS.z+.6);}
+{const gt=gridTex.clone();gt.needsUpdate=true;gt.repeat.set(106,60);add(new THREE.Mesh(new THREE.PlaneGeometry(FW,FH),new THREE.MeshBasicMaterial({map:gt,transparent:true,depthWrite:false,fog:false})),800,FCY,FOHS.z+.6);}
 const ledGlow=add(new THREE.PointLight(0xffffff,1.1,950,1.6),800,LCY,LED.z+130);
 const haloTex=(()=>{const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d'),g=x.createRadialGradient(32,32,8,32,32,32);g.addColorStop(0,'rgba(255,255,255,.9)');g.addColorStop(.55,'rgba(255,255,255,.35)');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(0,0,64,64);return new THREE.CanvasTexture(c);})();
 const haloMat=new THREE.SpriteMaterial(Object.assign({map:haloTex,color:0xffffff,opacity:.22,fog:false},{blending:THREE.CustomBlending,blendEquation:THREE.AddEquation,blendSrc:THREE.SrcAlphaFactor,blendDst:THREE.OneFactor,blendSrcAlpha:THREE.ZeroFactor,blendDstAlpha:THREE.OneFactor,depthWrite:false,transparent:true}));
