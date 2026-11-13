@@ -19,12 +19,12 @@ const TS=()=>firebase.database.ServerValue.TIMESTAMP,TAB=Math.random().toString(
 let ready=null;
 function init(){if(!ready)ready=(async()=>{firebase.initializeApp(CFG);const cred=await firebase.auth().signInAnonymously();const db=firebase.database();
     const ctx={db,id:cred.user.uid.slice(0,12)+'_'+TAB,off:0,now(){return Date.now()+this.off;}};
-    db.ref('.info/serverTimeOffset').on('value',s=>{ctx.off=s.val()||0;});return ctx;})();
+    db.ref('.info/serverTimeOffset').on('value',s=>{ctx.off=s.val()||0;});window.__now=()=>ctx.now();return ctx;})();
   ready.catch(()=>{ready=null;});return ready;}
 function makeRoom(ctx,name){
   const ref=ctx.db.ref('rooms/'+name),mine=ref.child(ctx.id),conn=ctx.db.ref('.info/connected');
   let sent={},full=null,pend=null,timer=null,lastSend=0,known=new Set(),lastPres={},cbs=[],errs=[],closed=false,first=true,listening=false;
-  // chỉ gửi những trường thay đổi, tối đa khoảng 3 lần/giây, để tiết kiệm lưu lượng miễn phí
+  // chỉ gửi những trường thay đổi, tối đa khoảng 10 lần/giây, để tiết kiệm lưu lượng miễn phí
   const flush=()=>{timer=null;if(closed||!pend)return;const up={};let n=0;for(const k in pend){const v=pend[k]==null?null:pend[k],j=JSON.stringify(v);if(sent[k]!==j){sent[k]=j;up[k]=v;n++;}}
     pend=null;if(!n)return;lastSend=Date.now();up.t=TS();mine.update(up).catch(()=>{});};
   const onConn=s=>{if(closed||!s.val())return;mine.onDisconnect().remove().catch(()=>{});const o=Object.assign({},full||{});for(const k in o)if(o[k]==null)delete o[k];o.t=TS();mine.update(o).catch(()=>{});};
@@ -37,7 +37,7 @@ function makeRoom(ctx,name){
   const onErr=e=>{for(const f of errs.slice()){try{f(e);}catch(x){}}};
   return{
     onPeers(cb,err){cbs.push(cb);if(err)errs.push(err);if(!listening){listening=true;ref.on('value',onVal,onErr);}return()=>{cbs=cbs.filter(c=>c!==cb);errs=errs.filter(c=>c!==err);};},
-    presence(o){if(closed)return Promise.resolve();full=Object.assign({},o);pend=Object.assign({},o);if(!timer)timer=setTimeout(flush,Math.max(0,330-(Date.now()-lastSend)));return Promise.resolve();},
+    presence(o){if(closed)return Promise.resolve();full=Object.assign({},o);pend=Object.assign({},o);if(!timer)timer=setTimeout(flush,Math.max(0,100-(Date.now()-lastSend)));return Promise.resolve();},
     join(n){return Promise.resolve(makeRoom(ctx,String(n).replace(/[.#$\[\]\/]/g,'-').slice(0,40)));},
     leave(){closed=true;clearInterval(hb);clearTimeout(timer);conn.off('value',onConn);if(listening)ref.off('value',onVal);mine.onDisconnect().cancel().catch(()=>{});return mine.remove().catch(()=>{});}
   };}
@@ -289,7 +289,7 @@ summary:hover{background:rgba(255,255,255,.04)}
     <div class="cbody">
       <div class="croom"><input id="roomIn" maxlength="24" placeholder="Mã phòng riêng (tuỳ chọn)" autocomplete="off" spellcheck="false"><button id="roomBtn">Vào phòng</button></div>
       <div id="roomInfo">Đang kết nối…</div>
-      <label class="chk"><input type="checkbox" id="followShow" checked> Tự xem cùng khi có người bắt đầu show</label>
+      <label class="chk"><input type="checkbox" id="followShow" checked> Tự xem cùng khi có người bắt đầu show hoặc chiếu YouTube</label>
       <div id="clog"></div>
       <form id="cform"><input id="cin" maxlength="120" placeholder="Nhắn gì đó… (Enter để gửi)" autocomplete="off"><button>Gửi</button></form>
     </div>
@@ -786,9 +786,19 @@ function handleShow(peer,q,nk){const sh=q.sh&&typeof q.sh==='object'&&Number.isF
   if(S.show&&S.show.f===peer&&(!sh||sh.s!==S.show.fs)){stopShow();SY.ignore=null;addLine('',nk+' đã dừng show.',null,{sys:true});}
   if(!sh||!$('followShow').checked||sh.s===SY.ignore||S.show)return;const k=Math.max(.2,Math.min(20,sh.k)),t=(Date.now()-sh.s)/1000;if(t<0||t>SHOWLEN*k)return;
   S.show={t,k,i:-1,f:peer,fs:sh.s};$('showBtn').textContent='■ Dừng xem show chung';addLine('',nk+' đang chạy show — bạn đã vào xem cùng.',null,{sys:true});}
-function handleYt(peer,q,nk){const u=typeof q.yt==='string'?q.yt.slice(0,200):null;if(SY.yt.get(peer)===u)return;SY.yt.set(peer,u);if(!u)return;
+// xem chung YouTube: người dán link là người chiếu, những người khác trong phòng tự mở cùng video và bám theo thời gian của người chiếu
+const NOW=()=>window.__now?window.__now():Date.now();
+function handleYt(peer,q,nk){const u=typeof q.yt==='string'?q.yt.slice(0,200):null;
+  if(SY.ytFollow===peer){SY.hs=Number.isFinite(q.ys)?q.ys:null;SY.hc=Number.isFinite(q.yc)?q.yc:null;}
+  if(SY.yt.get(peer)===u)return;SY.yt.set(peer,u);
+  if(!u){if(SY.ytFollow===peer){clearYT();addLine('',nk+' đã tắt video.',null,{sys:true});}return;}
   const pr=parseYT(u);if(!pr||!pr.id)return;const url='https://www.youtube.com/watch?v='+pr.id;
-  addLine('',nk+' đang mở một video YouTube.',null,{sys:true,btn:['▶ Mở cùng',()=>{$('ytIn').value=url;loadYT(url,true);}]});}
+  const go=()=>{$('ytIn').value=url;loadYT(url,true);SY.ytFollow=peer;SY.hs=Number.isFinite(q.ys)?q.ys:null;SY.hc=Number.isFinite(q.yc)?q.yc:null;};
+  if($('followShow').checked&&!hasLocal){go();addLine('',nk+' đang chiếu video YouTube — bạn đang xem cùng trên màn LED.',null,{sys:true});}
+  else addLine('',nk+' đang chiếu một video YouTube.',null,{sys:true,btn:['▶ Xem cùng',go]});}
+function tickFollow(dt){if(!SY.ytFollow||!ytId||ytBlocked||!$('followShow').checked)return;if((tickFollow.t=(tickFollow.t||0)+dt)<1.5)return;tickFollow.t=0;
+  if(SY.hs!=null){const tg=(NOW()-SY.hs)/1000;if(S.ytState===2||S.ytState===5||S.ytState===-1)ytCmd('playVideo');if(S.ytState===1&&tg>0&&Math.abs(YT.cur-tg)>2.5)ytCmd('seekTo',[tg,true]);}
+  else if(SY.hc!=null&&S.ytState===1)ytCmd('pauseVideo');}
 function syncPeers(list){const seen=new Set();let n=0,total=0;
   for(const pr of list){if(pr.kind!=='viewer')continue;total++;if(pr.sameTab)continue;const q=pr.presence||{},nk=cleanText(q.n,16)||'Khách',col=PAL[Math.abs(q.st|0)%PAL.length];
     try{handleChat(pr.peer,q,nk,col);handleShow(pr.peer,q,nk);handleYt(pr.peer,q,nk);}catch(e){}
@@ -803,9 +813,11 @@ function updatePeers(dt,t){for(const p of peersMap.values()){const dx=p.tx-p.x,d
     const mv=d>2,w=mv?Math.sin(t*11)*.7:0,c=p.char;p.g.position.set(p.x,terr(p.x,p.z)+(mv?0:Math.abs(Math.sin(S.beat*Math.PI))*3),p.z);p.bub.sp.visible=S.t<p.bub.until;
     if(c){c.root.rotation.y=p.rot;c.legL.rotation.x=w;c.legR.rotation.x=-w;c.armL.rotation.x=-w;c.armR.rotation.x=Math.PI+.3;c.armR.rotation.z=Math.sin(S.beat*Math.PI)*.3;}}
   myBubble.sp.visible=S.t<myBubble.until&&cam.mode!=='fp';}
-function tickNet(dt){if(!RM)return;netT+=dt;if(netT<.15&&!forceNet)return;netT=0;forceNet=false;
+function tickNet(dt){if(!RM)return;netT+=dt;if(netT<.1&&!forceNet)return;netT=0;forceNet=false;
   const o={x:Math.round(me.x),z:Math.round(me.y),r:+me.rot.toFixed(2),zone:me.zone.label,n:S.nick.slice(0,16),lk:S.look,st:S.stick,m:CH.mine,
-    sh:S.show&&!S.show.f?{s:S.show.at,k:+S.show.k.toFixed(4)}:null,yt:ytId&&!hasLocal&&ytUrl?ytUrl:null},j=JSON.stringify(o);
+    sh:S.show&&!S.show.f?{s:S.show.at,k:+S.show.k.toFixed(4)}:null,yt:null,ys:null,yc:null};
+  if(ytId&&!hasLocal&&ytUrl&&!ytBlocked&&!SY.ytFollow){o.yt=ytUrl;if(S.ytState===1||(S.ytState===3&&SY.anchor!=null)){const a=NOW()-YT.cur*1000;if(SY.anchor==null||Math.abs(a-SY.anchor)>800)SY.anchor=Math.round(a);o.ys=SY.anchor;}else{SY.anchor=null;o.yc=Math.round(YT.cur);}}
+  const j=JSON.stringify(o);
   if(j!==lastSent){lastSent=j;try{RM.presence(o).catch(()=>{});}catch(e){}}}
 // phòng chung của trang và phòng riêng theo mã
 function clearPeers(){for(const p of peersMap.values())scene.remove(p.g);peersMap.clear();}
@@ -947,7 +959,7 @@ function update(dt){
     x.fillStyle='rgba(0,0,0,.72)';x.fillRect(0,326,640,34);x.font='700 19px "Be Vietnam Pro",sans-serif';x.fillStyle=PAL[cBeat];x.textAlign='left';if(!update.tw)update.tw=x.measureText(TICK).width;
     let tx=-((t*70)%update.tw);for(;tx<640;tx+=update.tw)x.fillText(TICK,tx,350);ledT.needsUpdate=true;}
 
-  updatePeers(dt,t);tickNet(dt);
+  updatePeers(dt,t);tickFollow(dt);tickNet(dt);
   const jshow=COARSE&&me.zone.standing&&!me.travel&&cam.mode==='follow';if(jshow!==joy.show){joy.show=jshow;joyEl.style.display=jshow?'block':'none';if(!jshow)joy.x=joy.y=0;}
   // camera
   const seated=!me.zone.standing&&!me.travel;
@@ -998,7 +1010,7 @@ addEventListener('message',e=>{if(!/^https:\/\/www\.youtube(-nocookie)?\.com$/.t
 const YTERR={2:'Link video không hợp lệ.',5:'Trình duyệt không phát được video này.',100:'Video không tồn tại hoặc đã bị đặt riêng tư.',101:'Chủ video không cho phát ở trang khác — hãy chọn video khác (thường là bản lyric, fancam, live stage).',150:'Chủ video không cho phát ở trang khác — hãy chọn video khác (thường là bản lyric, fancam, live stage).',152:'YouTube từ chối nguồn phát của trang này.',153:'YouTube cần trang được mở qua địa chỉ web (http/https). Hãy mở game bằng file Mo-Concert.bat hoặc từ trang web, không mở trực tiếp file.'};
 function ytError(code){const msg=YTERR[code]||('YouTube báo lỗi '+code+'.');S.led={big:'KHÔNG PHÁT ĐƯỢC',small:msg.slice(0,60)};setTimeout(()=>{if(S.led&&S.led.big==='KHÔNG PHÁT ĐƯỢC')S.led=null;},9000);
   $('note').textContent='YouTube: '+msg;const url=ytUrl;clearYT();try{addLine('','YouTube: '+msg,null,{sys:true,btn:url?['Mở trên YouTube ↗',()=>window.open(url,'_blank','noopener')]:null});openChat();}catch(e){}}
-function clearYT(){if(!hasLocal)$('vbar').hidden=true;YT.dur=YT.cur=0;S.ytState=null;scr.querySelector('iframe')?.remove();scr2.querySelector('iframe')?.remove();MIR.state=null;MIR.cur=0;ytId=null;ytBlocked=false;scr.classList.remove('live');$('ytOpen').classList.remove('on');}
+function clearYT(){SY.ytFollow=null;SY.anchor=null;if(!hasLocal)$('vbar').hidden=true;YT.dur=YT.cur=0;S.ytState=null;scr.querySelector('iframe')?.remove();scr2.querySelector('iframe')?.remove();MIR.state=null;MIR.cur=0;ytId=null;ytBlocked=false;scr.classList.remove('live');$('ytOpen').classList.remove('on');}
 // video / nhạc từ máy: chiếu thẳng lên màn LED bằng texture, đèn chạy theo âm thanh thật
 const vid=document.createElement('video');vid.style.cssText='position:fixed;left:0;top:0;width:2px;height:2px;opacity:0;pointer-events:none;z-index:-1';document.body.appendChild(vid);vid.playsInline=true;vid.loop=true;vid.preload='auto';
 let vidTex=null,vidURL=null,actx=null,analyser=null,fdata=null,hasLocal=false,tapNode=null,tapFor=null,vidIsVideo=false;
@@ -1051,7 +1063,7 @@ function loadYT(s,auto){const p=parseYT(s);const inp=$('ytIn');
 function ytFail(){if(ytBlocked||!ytId)return;ytBlocked=true;scr.querySelector('iframe')?.remove();scr2.querySelector('iframe')?.remove();scr2.style.display='none';scr.classList.remove('live');scr.style.display='none';
   $('note').textContent='Khung xem này không cho nhúng video YouTube. Bấm "Mở YouTube ↗" ở thanh trên để nghe ở tab khác, hoặc dùng "Tải video" để chiếu thẳng lên màn LED.';}
 document.addEventListener('securitypolicyviolation',e=>{if(/frame|child|default/.test(e.violatedDirective||'')&&/youtube/.test(e.blockedURI||''))ytFail();});
-$('ytForm').addEventListener('submit',e=>{e.preventDefault();loadYT($('ytIn').value,true);$('ytIn').blur();});
+$('ytForm').addEventListener('submit',e=>{e.preventDefault();SY.ytFollow=null;SY.anchor=null;loadYT($('ytIn').value,true);$('ytIn').blur();});
 
 /* ───────── UI ───────── */
 const card=$('card');
