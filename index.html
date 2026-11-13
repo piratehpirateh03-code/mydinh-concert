@@ -1090,12 +1090,14 @@ function placeScreen(){
 }
 const YT={dur:0,cur:0};
 function ytCmd(func,args,which){const f=(which?which.el:scr).querySelector('iframe');if(!f)return;try{f.contentWindow.postMessage(JSON.stringify({event:'command',func,args:args||[]}),'https://www.youtube.com');}catch(e){}}
+function inferPlay(o,cur){if(!Number.isFinite(cur))return false;const n=performance.now();if(o.pc!==cur){if(o.pc!=null&&cur>o.pc&&cur-o.pc<5)o.adv=n;o.pc=cur;}return n-(o.adv||-1e9)<1500;}
 addEventListener('message',e=>{if(!/^https:\/\/www\.youtube(-nocookie)?\.com$/.test(e.origin)||typeof e.data!=='string')return;try{const d=JSON.parse(e.data),i=d&&d.info;const mm=MIRS.find(m=>{const f=m.el.querySelector('iframe');return f&&e.source===f.contentWindow;});
   if(d&&d.event==='onError'&&!mm){ytError(+i);return;}
   if(!i||typeof i!=='object')return;
-  if(mm){if(typeof i.playerState==='number')mm.state=i.playerState;if(Number.isFinite(i.currentTime))mm.cur=i.currentTime;return;}
+  if(mm){if(typeof i.playerState==='number')mm.state=i.playerState;if(Number.isFinite(i.currentTime))mm.cur=i.currentTime;if(inferPlay(mm,i.currentTime)&&(mm.state==null||mm.state===-1||mm.state===5||mm.state===0))mm.state=1;return;}
   if(typeof i.playerState==='number'){S.ytState=i.playerState;if(!hasLocal)$('vPlay').textContent=i.playerState===1?'❚❚':'▶';}
   if(Number.isFinite(i.duration)&&i.duration>0)YT.dur=i.duration;if(Number.isFinite(i.currentTime))YT.cur=i.currentTime;
+  if(inferPlay(YT,i.currentTime)&&(S.ytState==null||S.ytState===-1||S.ytState===5||S.ytState===0)){S.ytState=1;if(!hasLocal)$('vPlay').textContent='❚❚';}
   if(!hasLocal&&YT.dur&&!seeking)$('vSeek').value=YT.cur/YT.dur*1000;}catch(err){}});
 const YTERR={2:'Link video không hợp lệ.',5:'Trình duyệt không phát được video này.',100:'Video không tồn tại hoặc đã bị đặt riêng tư.',101:'Chủ video không cho phát ở trang khác — hãy chọn video khác (thường là bản lyric, fancam, live stage).',150:'Chủ video không cho phát ở trang khác — hãy chọn video khác (thường là bản lyric, fancam, live stage).',152:'YouTube từ chối nguồn phát của trang này.',153:'YouTube cần trang được mở qua địa chỉ web (http/https). Hãy mở game bằng file Mo-Concert.bat hoặc từ trang web, không mở trực tiếp file.'};
 function ytError(code){const msg=YTERR[code]||('YouTube báo lỗi '+code+'.');S.led={big:'KHÔNG PHÁT ĐƯỢC',small:msg.slice(0,60)};setTimeout(()=>{if(S.led&&S.led.big==='KHÔNG PHÁT ĐƯỢC')S.led=null;},9000);
