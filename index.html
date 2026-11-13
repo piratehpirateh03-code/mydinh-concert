@@ -277,12 +277,52 @@ summary{padding:0 16px;font-weight:600}summary::after{font-size:18px;color:var(-
 }
 @media (max-width:420px){#chat.min #chatHead .lbl{display:none}#chat.min #chatHead{padding:0 16px}#emo button{width:44px;height:44px}}
 @media (max-width:860px) and (max-height:520px){#chat:not(.min){max-height:82vh}#clog{height:78px}#panel{max-height:88dvh}#emo button{width:42px;height:42px}.zoom{flex-direction:row}}
+
+/* cổng soát vé: vòng tay (người trong phòng) + cuống vé (giành vé Ultimate) */
+#stageBar{position:fixed;z-index:5;left:50%;bottom:calc(14px + var(--sb));transform:translateX(-50%);display:flex;align-items:center;gap:10px}
+#stageBar #emo{position:static;transform:none}
+#bPpl{display:flex;align-items:center;gap:10px;min-height:56px;padding:0 16px 0 12px;border-radius:999px;border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(10px);color:var(--ink);text-align:left;cursor:pointer}
+#bPpl .dots{display:flex}#bPpl .dots i{width:18px;height:18px;border-radius:50%;border:2px solid #11131f;margin-left:-6px;box-shadow:0 0 8px currentColor}#bPpl .dots i:first-child{margin-left:0}
+#bPpl .dots i.u{outline:2px solid #ffd84a;outline-offset:-1px}
+#bPpl .tx{display:flex;flex-direction:column;line-height:1.15}#bPpl .tx small{font-size:11px;color:var(--dim)}#bPpl .tx b{font-size:14px}
+#bTk{position:relative;display:flex;align-items:stretch;min-height:56px;padding:0;border:0;border-radius:10px;cursor:pointer;color:#2a1d00;text-align:left;
+ background:linear-gradient(120deg,#fff3b8 0%,#ffd84a 42%,#f2a900 100%);filter:drop-shadow(0 4px 14px rgba(255,190,0,.28));
+ -webkit-mask:radial-gradient(circle 7px at 0 50%,#0000 97%,#000) left/51% 100% no-repeat,radial-gradient(circle 7px at 100% 50%,#0000 97%,#000) right/51% 100% no-repeat;
+ mask:radial-gradient(circle 7px at 0 50%,#0000 97%,#000) left/51% 100% no-repeat,radial-gradient(circle 7px at 100% 50%,#0000 97%,#000) right/51% 100% no-repeat}
+#bTk .m{display:flex;flex-direction:column;justify-content:center;padding:6px 14px 6px 18px;line-height:1.15}
+#bTk .m b{font-family:Unbounded,sans-serif;font-size:13px;font-weight:800;letter-spacing:.02em}#bTk .m small{font-size:11.5px;font-weight:600;opacity:.78;font-variant-numeric:tabular-nums}
+#bTk .s{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 16px 4px 12px;border-left:2px dashed rgba(42,29,0,.35);line-height:1}
+#bTk .s b{font-family:Unbounded,sans-serif;font-size:19px;font-weight:800;font-variant-numeric:tabular-nums}#bTk .s small{font-size:10.5px;font-weight:600;opacity:.75}
+#bTk.soon{animation:tkPulse 1.2s ease-in-out infinite}
+@keyframes tkPulse{50%{filter:drop-shadow(0 0 18px rgba(255,216,74,.85))}}
+#bPpl:focus-visible,#bTk:focus-visible,#pop button:focus-visible{outline:3px solid #fff;outline-offset:3px}
+#bPpl[aria-expanded=true]{border-color:rgba(255,216,74,.7)}
+#pop{position:fixed;z-index:7;left:50%;bottom:calc(84px + var(--sb));transform:translateX(-50%);width:min(380px,calc(100vw - 24px));max-height:min(62vh,560px);overflow:auto;
+ background:rgba(13,15,26,.95);border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.6);backdrop-filter:blur(14px);animation:sheetUp .18s ease-out}
+#pop[hidden]{display:none}
+#pop .ph{position:sticky;top:0;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 10px 8px 16px;background:inherit;z-index:1}
+#pop .ph h3{margin:0;font-family:Unbounded,sans-serif;font-size:14px;font-weight:700}
+#pop .ph button{width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.08);color:var(--ink);font-size:16px}
+#pop .pane{padding:0 16px 16px}#pop .pane[hidden]{display:none}
+#pop details{border:0;margin:0}#pop details>summary{display:none}#pop details>.dbody{padding:0}
+#tkJoin{margin:4px 0 12px;width:100%;min-height:48px;border:0;border-radius:12px;background:var(--accent);color:#1b1500;font-weight:800;font-size:15px}
+#tkJoin[hidden]{display:none}
+#ppl,#tkChip{display:none!important}
+@media (max-width:1180px) and (min-width:861px){#stageBar{display:grid;grid-template-areas:"p t" "e e";justify-items:center;row-gap:8px}#bPpl{grid-area:p;justify-self:end}#bTk{grid-area:t;justify-self:start}#stageBar #emo{grid-area:e}#bPpl .tx small{display:none}#bPpl{padding:0 14px 0 10px}#pop{bottom:calc(150px + var(--sb))}}
+@media (max-width:860px){
+ #stageBar{left:12px;right:12px;transform:none;display:grid;grid-template-areas:"p t ." "e e e";grid-template-columns:auto auto 1fr;justify-items:start;row-gap:10px;column-gap:8px;bottom:calc(12px + var(--sb));pointer-events:none}
+ #stageBar>*{pointer-events:auto}#bPpl{grid-area:p;min-height:46px;padding:0 12px 0 10px}#bTk{grid-area:t;min-height:46px}#stageBar #emo{grid-area:e;justify-self:center}
+ #bPpl .tx small{display:none}#bPpl .dots i{width:15px;height:15px}#bTk .m{padding:4px 10px 4px 15px}#bTk .s{padding:2px 13px 2px 10px}#bTk .s b{font-size:16px}
+ #chips{bottom:calc(132px + var(--sb))}#joy{bottom:calc(140px + var(--sb))}
+ #pop{left:0;right:0;bottom:0;transform:none;width:auto;max-height:72dvh;border-radius:22px 22px 0 0;padding-bottom:var(--sb);z-index:9}
+ #pop .ph{padding-top:16px}#pop .ph::before{content:"";position:absolute;top:6px;left:50%;width:40px;height:4px;margin-left:-20px;border-radius:4px;background:rgba(255,255,255,.3)}}
+@media (prefers-reduced-motion:reduce){#bTk.soon{animation:none}#pop{animation:none}}
 @keyframes sheetUp{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
 #vbar #vUnmute{width:auto;height:38px;border-radius:999px;padding:0 14px;font-size:12.5px;font-weight:700;background:#fff;color:#0b0c14;white-space:nowrap}#vUnmute[hidden]{display:none}
 @media (max-width:860px){#vVol{display:none}}
 
 /* ── Màn chào: chọn nhân vật → nickname → chọn zone ── */
-body.intro header,body.intro .zoom,body.intro #panel,body.intro #dock,body.intro #emo,body.intro #chips,body.intro #vbar,body.intro #menuBtn,body.intro #joy,body.intro #scrim{display:none!important}
+body.intro header,body.intro .zoom,body.intro #panel,body.intro #dock,body.intro #emo,body.intro #stageBar,body.intro #pop,body.intro #chips,body.intro #vbar,body.intro #menuBtn,body.intro #joy,body.intro #scrim{display:none!important}
 #intro{position:fixed;inset:0;z-index:20;pointer-events:none;display:none}
 body.intro #intro{display:block}
 #intro .box{pointer-events:auto;position:absolute;left:max(18px,env(safe-area-inset-left,0px));top:50%;transform:translateY(-50%);width:min(390px,calc(100vw - 36px));max-height:calc(100dvh - 36px);overflow:auto;
@@ -540,7 +580,8 @@ body.guest #menuBtn{margin-left:auto}
   </section>
   <div id="card"></div>
 </div>
-<div id="emo"><button data-e="cheer" title="Cổ vũ (phím 1)">🙌</button><button data-e="wave" title="Vẫy lightstick (phím 2)">👋</button><button data-e="dance" title="Nhảy (phím 3)">💃</button></div>
+<div id="stageBar"><button id="bPpl" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="pop"><span class="dots" id="bDots" aria-hidden="true"></span><span class="tx"><small id="bRoom">Phòng chung</small><b id="bCnt">1 người</b></span></button><div id="emo"><button data-e="cheer" title="Cổ vũ (phím 1)">🙌</button><button data-e="wave" title="Vẫy lightstick (phím 2)">👋</button><button data-e="dance" title="Nhảy (phím 3)">💃</button></div><button id="bTk" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="pop"><span class="m"><b id="bTkT">Vé Ultimate</b><small id="bTkS">Chưa có lịch bán</small></span><span class="s"><b id="bTkN">30</b><small>vé</small></span></button></div>
+<div id="pop" hidden role="dialog" aria-labelledby="popH"><div class="ph"><h3 id="popH">Người trong phòng</h3><button type="button" id="popX" aria-label="Đóng">✕</button></div><div class="pane" data-p="ppl" id="paneP"></div><div class="pane" data-p="tk" id="paneT"><button type="button" id="tkJoin" hidden>Vào phòng chờ mua vé</button></div></div>
 <div id="tk" hidden role="dialog" aria-modal="true" aria-labelledby="tkH"><div class="tkc">
   <button class="tkx" id="tkX" aria-label="Đóng">✕</button>
   <div class="tkbrand">BIGBANG &lt;XX : COSMOS&gt; · Mỹ Đình<em>MÔ PHỎNG</em></div>
@@ -1698,8 +1739,13 @@ function tkTick(){const now=NOW(),chip=$('tkChip'),st=$('tkSt');if(ROOM.host)TK.
   if(!ROOM.host&&!TK.rem&&TK.at&&!TK.on)TK.at=0;
   if(TK.at>now)st.textContent=`Mở bán lúc ${fmtClk(TK.at)} (còn ${fmtCd(TK.at-now)}) theo giờ thật · độ khó: ${TKLV[TK.lv].n}. Phòng chờ tự mở trước 45 giây.`;
   else st.textContent='Chưa hẹn giờ.'+(ROOM.host?'':' Chỉ chủ phòng hẹn giờ được.');
-  chip.hidden=!(TK.at>now&&!TK.on);if(!chip.hidden)chip.textContent='🎟 Vé Ultimate · '+fmtCd(TK.at-now);
+  chip.hidden=!(TK.at>now&&!TK.on);if(!chip.hidden)chip.textContent='🎟 Vé Ultimate · '+fmtCd(TK.at-now);bTkUpd(now);
   if(TK.at&&TK.at!==TK.done&&!TK.on&&!INTRO.on&&!TK.auto&&now>=TK.at-45000){TK.auto=true;if(now>TK.at+4000){TK.done=TK.at;addLine('','Bạn đã lỡ phiên bán vé Ultimate đã hẹn.',null,{sys:true});}else tkOpen();}}
+function bTkUpd(now){const sc=TK.at>now&&!TK.on,b=$('bTk');
+  $('bTkT').textContent=S.ult?'Vé vàng của bạn':'Vé Ultimate';
+  $('bTkS').textContent=TK.on?'Đang mở bán':sc?'Mở bán sau '+fmtCd(TK.at-now):(S.ult?'Đã giành được':'Chưa có lịch bán');
+  $('bTkN').textContent=TKT;b.classList.toggle('soon',sc&&TK.at-now<60000);$('tkJoin').hidden=!(TK.at&&!TK.on&&now<TK.at+4000);
+  b.setAttribute('aria-label',$('bTkT').textContent+', '+$('bTkS').textContent+', '+TKT+' vé');}
 function tkSched(ms){if(!ROOM.host){$('tkSt').textContent='Chỉ chủ phòng mới hẹn giờ được.';return;}
   TK.at=ms;TK.sd=(Math.random()*4294967296)>>>0;TK.auto=false;TK.done=0;TK.rem=0;TK.resA=0;TK.resW=0;tkSave();forceNet=true;tkTick();
   addLine('','Đã hẹn phiên giành vé Ultimate lúc '+fmtClk(ms)+' (giờ thật). Mọi người trong phòng sẽ tự được mời tham gia.',null,{sys:true});}
@@ -1724,6 +1770,10 @@ function plRender(list){const box=$('memList');if(!box)return;
   const rows=list.filter(p=>p.kind==='viewer').map(p=>({id:p.peer,me:!!p.sameTab,n:cleanText((p.presence||{}).n,16)||'Khách',u:(p.presence||{}).u?1:0,h:p.sameTab?!!ROOM.host:p.peer===ROOM.hostPeer}));
   if(!rows.some(r=>r.me))rows.push({id:'~me',me:true,n:S.nick.trim()||'Bạn',u:S.ult?1:0,h:!!ROOM.host});
   rows.sort((a,b)=>(b.h-a.h)||(b.me-a.me)||a.n.localeCompare(b.n));
+  {const dk=rows.slice(0,5).map(r=>r.id+r.u).join()+rows.length+ROOM.code;if(dk!==plRender.dk){plRender.dk=dk;const dt=$('bDots');dt.textContent='';
+    for(const r of rows.slice(0,5)){const i=document.createElement('i');let hsh=0;for(const ch of String(r.id))hsh=(hsh*31+ch.charCodeAt(0))>>>0;const c=PAL[hsh%PAL.length];i.style.background=c;i.style.color=c;if(r.u)i.className='u';dt.appendChild(i);}
+    $('bRoom').textContent=ROOM.kind==='priv'?'Phòng '+String(ROOM.code||'').toUpperCase():'Phòng chung';$('bCnt').textContent=rows.length+' người';
+    $('bPpl').setAttribute('aria-label','Người trong phòng: '+rows.length+' người');}}
   const sig=JSON.stringify(rows)+ROOM.host;if(sig===plSig)return;plSig=sig;$('plCnt').textContent=rows.length;box.textContent='';
   for(const r of rows){const d=document.createElement('div');d.className='pr';const nm=document.createElement('span');nm.className='pn'+(r.u?' ul':'');nm.textContent=(r.u?'★ ':'')+r.n+(r.me?' (bạn)':'');d.appendChild(nm);
     if(r.h){const t=document.createElement('em');t.textContent='👑 Chủ phòng';d.appendChild(t);}
@@ -1731,7 +1781,16 @@ function plRender(list){const box=$('memList');if(!box)return;
       b.onclick=()=>{if(!armed){armed=1;b.textContent='Chắc chắn?';b.classList.add('arm');setTimeout(()=>{armed=0;b.textContent='Trao quyền';b.classList.remove('arm');},3000);return;}
         ROOM.tx=r.id;ROOM.txAt=performance.now();forceNet=true;b.disabled=true;b.textContent='Đang trao…';addLine('','Đã trao quyền chủ phòng cho '+r.n+'.',null,{sys:true});};d.appendChild(b);}
     box.appendChild(d);}}
-setInterval(()=>{try{hostXfer(ROOM.peers||[]);plRender(ROOM.peers||[]);}catch(e){}},500);plRender([]);
+setInterval(()=>{try{hostXfer(ROOM.peers||[]);plRender(ROOM.peers||[]);}catch(e){}},500);
+{const pp=$('paneP'),pt=$('paneT'),ps=$('plSec'),ts=$('tkSec');ps.open=true;ts.open=true;pp.appendChild(ps);pt.appendChild(ts);}
+let popAt='';
+function popSet(w){popAt=w;const p=$('pop');p.hidden=!w;$('paneP').hidden=w!=='ppl';$('paneT').hidden=w!=='tk';
+  $('popH').textContent=w==='tk'?'Giành vé Ultimate':'Người trong phòng';$('bPpl').setAttribute('aria-expanded',w==='ppl');$('bTk').setAttribute('aria-expanded',w==='tk');if(w)p.scrollTop=0;}
+$('bPpl').onclick=()=>popSet(popAt==='ppl'?'':'ppl');$('bTk').onclick=()=>{popSet(popAt==='tk'?'':'tk');bTkUpd(NOW());};$('popX').onclick=()=>popSet('');
+$('tkJoin').onclick=()=>{if(!TK.on&&!INTRO.on){popSet('');tkOpen();}};
+document.addEventListener('pointerdown',e=>{if(popAt&&!e.target.closest('#pop,#stageBar'))popSet('');},true);
+addEventListener('keydown',e=>{if(e.key==='Escape'&&popAt&&!TK.on)popSet('');});
+plRender([]);
 $('tkSet').onclick=()=>{const v=$('tkTime').value,t=v?new Date(v).getTime():NaN;if(!Number.isFinite(t)||t<NOW()+5000){$('tkSt').textContent='Hãy chọn ngày giờ trong tương lai (theo giờ thật).';return;}tkSched(t);};
 $('tk30').onclick=()=>tkSched(NOW()+30000);
 $('tkCancel').onclick=()=>{if(!ROOM.host)return;TK.at=0;TK.auto=false;tkSave();forceNet=true;tkTick();};
@@ -1745,7 +1804,7 @@ tkLoad();[...$('tkLv').children].forEach(c=>c.classList.toggle('on',c.dataset.v=
 if(S.ult){tkOwn();setNick(S.nick);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>setNick(S.nick));}
 if(TK.at)$('tkTime').value=locIso(TK.at);
 setInterval(tkTick,500);tkTick();
-window.__sim={TK,tkOpen,tkBots,tkLB,tkClose,tkCnt,tkKth,tkPeers,tkRemote,tkSched,plRender,hostXfer,YTS,ytSearch,ROOM,plAdd,plPlay,plNext,renderPL,refreshHost,INTRO,ledHole,ledMain,fohMesh,sendChat,joinCode,Q,joy,AUD,peersMap,emote,startShow,vid,keys,S,me,cam,zones,goZone,overview,perf,loadYT,handleYt,SY,YT,MIRS};
+window.__sim={TK,tkOpen,tkBots,tkLB,tkClose,tkCnt,tkKth,tkPeers,tkRemote,tkSched,plRender,hostXfer,popSet,bTkUpd,YTS,ytSearch,ROOM,plAdd,plPlay,plNext,renderPL,refreshHost,INTRO,ledHole,ledMain,fohMesh,sendChat,joinCode,Q,joy,AUD,peersMap,emote,startShow,vid,keys,S,me,cam,zones,goZone,overview,perf,loadYT,handleYt,SY,YT,MIRS};
 // một lỗi lẻ không được làm đứng cả game: báo ra khung chat rồi chạy tiếp
 function loopErr(e){if(loopErr.n)return;loopErr.n=1;try{addLine('','Lỗi khi dựng hình: '+String((e&&e.message)||e).slice(0,140),null,{sys:true});openChat();}catch(x){}}
 let last=performance.now();
