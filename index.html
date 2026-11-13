@@ -175,9 +175,9 @@ summary:hover{background:rgba(255,255,255,.04)}
 .zoom{position:fixed;z-index:4;left:12px;top:66px;display:grid;gap:5px}
 .zoom button{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--glass);font-size:16px;backdrop-filter:blur(10px)}
 
-#screen,#screen2{position:fixed;z-index:0;pointer-events:none;left:0;top:0;width:640px;height:360px;transform-origin:0 0;background:#000;overflow:hidden;
+#screen,#screen2,.scrS{position:fixed;z-index:0;pointer-events:none;left:0;top:0;width:640px;height:360px;transform-origin:0 0;background:#000;overflow:hidden;
   box-shadow:0 0 0 2px #1b1e2c,0 0 40px rgba(255,216,74,.25);pointer-events:none}
-#screen iframe,#screen2 iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+#screen iframe,#screen2 iframe,.scrS iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 #idle{position:absolute;inset:0;display:grid;place-items:center;text-align:center;
   background:radial-gradient(circle at 50% 120%,#3b2c00,#000 70%);container-type:inline-size}
 #idle div{font-family:Unbounded,sans-serif;font-weight:800;font-size:7cqw;line-height:1.25;letter-spacing:.05em;color:var(--accent)}
@@ -205,6 +205,8 @@ summary:hover{background:rgba(255,255,255,.04)}
 
 <div id="screen" style="display:none"><div id="idle"></div></div>
 <div id="screen2" style="display:none"></div>
+<div id="screen3" class="scrS" style="display:none"></div>
+<div id="screen4" class="scrS" style="display:none"></div>
 
 <div id="vbar" hidden><button id="vPlay" title="Phát / tạm dừng">❚❚</button><span id="vName"></span><span id="vTime"></span><input type="range" id="vSeek" min="0" max="1000" value="0" title="Tua"><input type="range" id="vVol" min="0" max="100" value="80" title="Âm lượng"><button id="vClose" title="Tắt video">✕</button></div>
 
@@ -504,8 +506,9 @@ const haloMat=new THREE.SpriteMaterial(Object.assign({map:haloTex,color:0xffffff
 const halo=new THREE.Sprite(haloMat);halo.scale.set(980,380,1);add(halo,800,LCY,LED.z-2);
 const avgC=document.createElement('canvas');avgC.width=avgC.height=4;const avgX=avgC.getContext('2d',{willReadFrequently:true}),ledAvg=new THREE.Color(1,1,1);
 function sampleLed(src){try{avgX.drawImage(src,0,0,4,4);const d=avgX.getImageData(0,0,4,4).data;let r=0,g=0,b=0;for(let i=0;i<64;i+=4){r+=d[i];g+=d[i+1];b+=d[i+2];}ledAvg.setRGB(r/4080,g/4080,b/4080);}catch(e){}}
+const sideLed=[];
 for(const sd of[-1,1]){const g=new THREE.Group();g.position.set(800+sd*475,214,305);g.rotation.y=-sd*.38;scene.add(g);
-  const fr=new THREE.Mesh(new THREE.BoxGeometry(225,132,8),dark);fr.position.z=-5;g.add(fr);g.add(new THREE.Mesh(new THREE.PlaneGeometry(213,120),ledMat));
+  const fr=new THREE.Mesh(new THREE.BoxGeometry(225,132,8),dark);fr.position.z=-5;g.add(fr);{const pl=new THREE.Mesh(new THREE.PlaneGeometry(213,120),ledMat);g.add(pl);sideLed.push(pl);}
   for(const lx of[-80,80]){const leg=new THREE.Mesh(new THREE.BoxGeometry(9,160,9),dark);leg.position.set(lx,-140,-6);g.add(leg);}}
 
 // sprite phát sáng
@@ -917,10 +920,10 @@ function update(dt){
 
   // đèn
   washA.color.copy(PC[cA]);washA.intensity=(1.1+.9*pulse)*Math.max(.25,dim)*lz;washB.color.copy(PC[cB]);washB.intensity=(.9+.7*pulse)*Math.max(.25,dim)*lz;
-  const ytOn=!!ytId&&!ytBlocked,mir=ytOn&&!!scr2.firstChild;ledHole.visible=ytOn;fohMesh.material=mir?holeMat:ledMat;
+  const ytOn=!!ytId&&!ytBlocked,mir=ytOn&&!!scr2.firstChild;ledHole.visible=ytOn;fohMesh.material=mir?holeMat:ledMat;for(const m of MIRS)if(m.mesh)m.mesh.material=ytOn&&m.el.firstChild?holeMat:ledMat;
   {const vOK=hasLocal&&vid.videoWidth&&vid.readyState>=2;if((update.wt=(update.wt||0)+dt)>(vOK&&!vid.paused?1/30:.08)){update.wt=0;if(vOK){try{vfX.drawImage(vid,0,0,640,360);vfT.needsUpdate=true;}catch(e){}drawWall(vfC,vid.videoWidth,vid.videoHeight);}else drawWall(ledC,640,360);}}
-  if(mir&&(update.ms=(update.ms||0)+dt)>1.2){update.ms=0;if(S.ytState===1&&MIR.state!==1)ytCmd('playVideo',[],2);else if(S.ytState===2&&MIR.state===1)ytCmd('pauseVideo',[],2);
-    if(S.ytState===1&&YT.cur>0&&Math.abs(MIR.cur-YT.cur)>.8)ytCmd('seekTo',[YT.cur+.25,true],2);}
+  if(ytOn&&(update.ms=(update.ms||0)+dt)>1.2){update.ms=0;for(const m of MIRS){if(!m.el.firstChild)continue;if(S.ytState===1&&m.state!==1)ytCmd('playVideo',[],m);else if(S.ytState===2&&m.state===1)ytCmd('pauseVideo',[],m);
+    if(S.ytState===1&&YT.cur>0&&Math.abs(m.cur-YT.cur)>.8)ytCmd('seekTo',[YT.cur+.25,true],m);}}
   if((update.st=(update.st||0)+dt)>.1){update.st=0;if(hasLocal&&vid.videoWidth&&vid.readyState>=2)sampleLed(vfC);else if(ytOn)ledAvg.setRGB(.55,.6,.75);else sampleLed(ledC);}
   if(hasLocal&&performance.now()-(update.wd||0)>1000){update.wd=performance.now();const ct=vid.currentTime;$('vTime').textContent=mmss(ct)+(isFinite(vid.duration)&&vid.duration?' / '+mmss(vid.duration):'');
     if(!vid.paused&&!vid.ended&&vid.readyState>0&&ct===update.wc){update.ws=(update.ws||0)+1;if(update.ws===3){try{vid.currentTime=ct+.05;vid.play().catch(()=>{});}catch(e){}
@@ -983,9 +986,14 @@ const TICK='HÀ NỘI ƠI!  ✦  GIƠ LIGHTSTICK LÊN NÀO  ✦  1 · 2 · 3 —
 const scr=$('screen'),idle=$('idle');let ytId=null,ytBlocked=false,ytUrl='';
 const corners=[V(CEN.x0-1.5,LED.y1+1.5,LED.z),V(CEN.x1+1.5,LED.y1+1.5,LED.z),V(CEN.x1+1.5,LED.y0-1.5,LED.z),V(CEN.x0-1.5,LED.y0-1.5,LED.z)];
 // ghim khung YouTube đúng vào mặt màn LED bằng phép biến đổi phối cảnh
-const scr2=$('screen2'),MIR={state:null,cur:0};
+const scr2=$('screen2'),MIR={el:scr2,state:null,cur:0,ch:2};
 const corners2=[V(FOHS.x0-1.5,FOHS.y1+1.5,FOHS.z),V(FOHS.x1+1.5,FOHS.y1+1.5,FOHS.z),V(FOHS.x1+1.5,FOHS.y0-1.5,FOHS.z),V(FOHS.x0-1.5,FOHS.y0-1.5,FOHS.z)];
-function projFrame(el,cs,pz){let ok=camera.position.z>pz+5;
+// các màn phụ chiếu lại YouTube (tắt tiếng, bám theo màn chính): màn sau FOH + hai màn LED hai bên sân khấu chính
+const MIRS=[MIR];MIR.cs=corners2;MIR.pl=FOHS.z;
+sideLed.forEach((pl,i)=>{pl.updateWorldMatrix(true,false);const cs=[[-108,61.5],[108,61.5],[108,-61.5],[-108,-61.5]].map(([x,y])=>pl.localToWorld(V(x,y,0)));
+  const c=pl.localToWorld(V(0,0,0)),n=pl.localToWorld(V(0,0,1)).sub(c).normalize();MIRS.push({el:$('screen'+(3+i)),state:null,cur:0,ch:3+i,cs,pl:{c,n},mesh:pl,side:true});});
+const frontOf=pl=>typeof pl==='number'?camera.position.z-pl:tmpV.copy(camera.position).sub(pl.c).dot(pl.n);
+function projFrame(el,cs,pz){let ok=frontOf(pz)>5;
   const p=cs.map(c=>{tmpV.copy(c).project(camera);if(tmpV.z>=1||tmpV.z<=-1)ok=false;return[(tmpV.x+1)/2*W,(1-tmpV.y)/2*H];});
   if(!ok){el.style.display='';el.style.visibility='hidden';return;}
   const[[x0,y0],[x1,y1],[x2,y2],[x3,y3]]=p,dx1=x1-x2,dx2=x3-x2,dx3=x0-x1+x2-x3,dy1=y1-y2,dy2=y3-y2,dy3=y0-y1+y2-y3,den=dx1*dy2-dx2*dy1;
@@ -993,24 +1001,25 @@ function projFrame(el,cs,pz){let ok=camera.position.z>pz+5;
   const g=(dx3*dy2-dx2*dy3)/den,h=(dx1*dy3-dx3*dy1)/den,a=x1-x0+g*x1,b=x3-x0+h*x3,d=y1-y0+g*y1,e=y3-y0+h*y3;
   el.style.display='';el.style.visibility='visible';el.style.transform=`matrix3d(${a/640},${d/640},0,${g/640},${b/360},${e/360},0,${h/360},0,0,1,0,${x0},${y0},0,1)`;}
 function placeScreen(){
-  if(!ytId||ytBlocked){scr.style.display='none';scr2.style.display='none';return;}
-  projFrame(scr,corners,LED.z);if(scr2.firstChild)projFrame(scr2,corners2,FOHS.z);else scr2.style.display='none';
-  // khung nào gần camera hơn thì nằm trên (cả hai vẫn nằm sau ảnh 3D)
-  const near2=Math.abs(camera.position.z-FOHS.z)<Math.abs(camera.position.z-LED.z);scr.style.zIndex=near2?0:1;scr2.style.zIndex=near2?1:0;
+  if(!ytId||ytBlocked){scr.style.display='none';for(const m of MIRS)m.el.style.display='none';return;}
+  projFrame(scr,corners,LED.z);for(const m of MIRS){if(m.el.firstChild)projFrame(m.el,m.cs,m.pl);else m.el.style.display='none';}
+  // khung nào gần camera hơn thì nằm trên (tất cả vẫn nằm sau ảnh 3D)
+  const ord=[{el:scr,d:Math.abs(camera.position.z-LED.z)}];for(const m of MIRS)ord.push({el:m.el,d:Math.abs(frontOf(m.pl))});ord.sort((a,b)=>b.d-a.d).forEach((o,i)=>{o.el.style.zIndex=i;});
 }
 const YT={dur:0,cur:0};
-function ytCmd(func,args,which){const f=(which===2?scr2:scr).querySelector('iframe');if(!f)return;try{f.contentWindow.postMessage(JSON.stringify({event:'command',func,args:args||[]}),'https://www.youtube.com');}catch(e){}}
-addEventListener('message',e=>{if(!/^https:\/\/www\.youtube(-nocookie)?\.com$/.test(e.origin)||typeof e.data!=='string')return;try{const d=JSON.parse(e.data),i=d&&d.info;const mf=scr2.querySelector('iframe');
-  if(d&&d.event==='onError'&&!(mf&&e.source===mf.contentWindow)){ytError(+i);return;}
+function ytCmd(func,args,which){const f=(which?which.el:scr).querySelector('iframe');if(!f)return;try{f.contentWindow.postMessage(JSON.stringify({event:'command',func,args:args||[]}),'https://www.youtube.com');}catch(e){}}
+addEventListener('message',e=>{if(!/^https:\/\/www\.youtube(-nocookie)?\.com$/.test(e.origin)||typeof e.data!=='string')return;try{const d=JSON.parse(e.data),i=d&&d.info;const mm=MIRS.find(m=>{const f=m.el.querySelector('iframe');return f&&e.source===f.contentWindow;});
+  if(d&&d.event==='onError'&&!mm){ytError(+i);return;}
   if(!i||typeof i!=='object')return;
-  if(mf&&e.source===mf.contentWindow){if(typeof i.playerState==='number')MIR.state=i.playerState;if(Number.isFinite(i.currentTime))MIR.cur=i.currentTime;return;}
+  if(mm){if(typeof i.playerState==='number')mm.state=i.playerState;if(Number.isFinite(i.currentTime))mm.cur=i.currentTime;return;}
   if(typeof i.playerState==='number'){S.ytState=i.playerState;if(!hasLocal)$('vPlay').textContent=i.playerState===1?'❚❚':'▶';}
   if(Number.isFinite(i.duration)&&i.duration>0)YT.dur=i.duration;if(Number.isFinite(i.currentTime))YT.cur=i.currentTime;
   if(!hasLocal&&YT.dur&&!seeking)$('vSeek').value=YT.cur/YT.dur*1000;}catch(err){}});
 const YTERR={2:'Link video không hợp lệ.',5:'Trình duyệt không phát được video này.',100:'Video không tồn tại hoặc đã bị đặt riêng tư.',101:'Chủ video không cho phát ở trang khác — hãy chọn video khác (thường là bản lyric, fancam, live stage).',150:'Chủ video không cho phát ở trang khác — hãy chọn video khác (thường là bản lyric, fancam, live stage).',152:'YouTube từ chối nguồn phát của trang này.',153:'YouTube cần trang được mở qua địa chỉ web (http/https). Hãy mở game bằng file Mo-Concert.bat hoặc từ trang web, không mở trực tiếp file.'};
 function ytError(code){const msg=YTERR[code]||('YouTube báo lỗi '+code+'.');S.led={big:'KHÔNG PHÁT ĐƯỢC',small:msg.slice(0,60)};setTimeout(()=>{if(S.led&&S.led.big==='KHÔNG PHÁT ĐƯỢC')S.led=null;},9000);
   $('note').textContent='YouTube: '+msg;const url=ytUrl;clearYT();try{addLine('','YouTube: '+msg,null,{sys:true,btn:url?['Mở trên YouTube ↗',()=>window.open(url,'_blank','noopener')]:null});openChat();}catch(e){}}
-function clearYT(){SY.ytFollow=null;SY.anchor=null;if(!hasLocal)$('vbar').hidden=true;YT.dur=YT.cur=0;S.ytState=null;scr.querySelector('iframe')?.remove();scr2.querySelector('iframe')?.remove();MIR.state=null;MIR.cur=0;ytId=null;ytBlocked=false;scr.classList.remove('live');$('ytOpen').classList.remove('on');}
+function dropMirrors(){for(const m of MIRS){m.el.querySelector('iframe')?.remove();m.el.style.display='none';m.state=null;m.cur=0;}}
+function clearYT(){SY.ytFollow=null;SY.anchor=null;if(!hasLocal)$('vbar').hidden=true;YT.dur=YT.cur=0;S.ytState=null;scr.querySelector('iframe')?.remove();dropMirrors();ytId=null;ytBlocked=false;scr.classList.remove('live');$('ytOpen').classList.remove('on');}
 // video / nhạc từ máy: chiếu thẳng lên màn LED bằng texture, đèn chạy theo âm thanh thật
 const vid=document.createElement('video');vid.style.cssText='position:fixed;left:0;top:0;width:2px;height:2px;opacity:0;pointer-events:none;z-index:-1';document.body.appendChild(vid);vid.playsInline=true;vid.loop=true;vid.preload='auto';
 let vidTex=null,vidURL=null,actx=null,analyser=null,fdata=null,hasLocal=false,tapNode=null,tapFor=null,vidIsVideo=false;
@@ -1054,13 +1063,14 @@ function loadYT(s,auto){const p=parseYT(s);const inp=$('ytIn');
   scr.querySelector('iframe')?.remove();
   const f=document.createElement('iframe');f.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';f.referrerPolicy='strict-origin-when-cross-origin';
   f.title='YouTube';f.addEventListener('load',()=>{try{f.contentWindow.postMessage(JSON.stringify({event:'listening',id:1,channel:'widget'}),'https://www.youtube.com');}catch(e){}});f.src=src;scr.appendChild(f);
-  scr2.querySelector('iframe')?.remove();MIR.state=null;MIR.cur=0;{const m=document.createElement('iframe');m.allow='autoplay; encrypted-media';m.referrerPolicy='strict-origin-when-cross-origin';m.title='YouTube (màn phụ)';
-    m.addEventListener('load',()=>{try{m.contentWindow.postMessage(JSON.stringify({event:'listening',id:2,channel:'widget'}),'https://www.youtube.com');}catch(e){}});m.src=src+'&mute=1&controls=0';scr2.appendChild(m);}$('vName').textContent='YouTube';$('vPlay').textContent=auto?'❚❚':'▶';$('vSeek').value=0;$('vbar').hidden=false;scr.classList.add('live');idle.style.display='none';
+  dropMirrors();for(const M of MIRS){if(M.side&&COARSE)continue; // điện thoại: bỏ hai màn bên cho nhẹ máy
+    const m=document.createElement('iframe');m.allow='autoplay; encrypted-media';m.referrerPolicy='strict-origin-when-cross-origin';m.title='YouTube (màn phụ)';
+    m.addEventListener('load',()=>{try{m.contentWindow.postMessage(JSON.stringify({event:'listening',id:M.ch,channel:'widget'}),'https://www.youtube.com');}catch(e){}});m.src=src+'&mute=1&controls=0';M.el.appendChild(m);}$('vName').textContent='YouTube';$('vPlay').textContent=auto?'❚❚':'▶';$('vSeek').value=0;$('vbar').hidden=false;scr.classList.add('live');idle.style.display='none';
   const o=$('ytOpen');o.href=ytUrl;o.classList.add('on');
   try{localStorage.setItem('mdsim.yt',s);}catch(e){}
   if(location.protocol==='file:')$('note').textContent='Bạn đang mở file trực tiếp nên YouTube sẽ báo lỗi 153. Hãy mở game bằng file Mo-Concert.bat (đi kèm trong gói) để xem YouTube ngay trên màn LED.';
 }
-function ytFail(){if(ytBlocked||!ytId)return;ytBlocked=true;scr.querySelector('iframe')?.remove();scr2.querySelector('iframe')?.remove();scr2.style.display='none';scr.classList.remove('live');scr.style.display='none';
+function ytFail(){if(ytBlocked||!ytId)return;ytBlocked=true;scr.querySelector('iframe')?.remove();dropMirrors();scr.classList.remove('live');scr.style.display='none';
   $('note').textContent='Khung xem này không cho nhúng video YouTube. Bấm "Mở YouTube ↗" ở thanh trên để nghe ở tab khác, hoặc dùng "Tải video" để chiếu thẳng lên màn LED.';}
 document.addEventListener('securitypolicyviolation',e=>{if(/frame|child|default/.test(e.violatedDirective||'')&&/youtube/.test(e.blockedURI||''))ytFail();});
 $('ytForm').addEventListener('submit',e=>{e.preventDefault();SY.ytFollow=null;SY.anchor=null;loadYT($('ytIn').value,true);$('ytIn').blur();});
