@@ -507,6 +507,18 @@ body.guest #menuBtn{margin-left:auto}
 .cl.win{color:#fff3b0;font-style:normal;font-weight:700;font-size:12.5px;padding:5px 8px;border-radius:8px;background:linear-gradient(135deg,rgba(255,216,74,.32),rgba(226,154,0,.16));border:1px solid rgba(255,216,74,.55)}
 @media (prefers-reduced-motion:reduce){.tkgold i,.tkgo.live,.tkconf b{animation:none}}
 @media (max-width:480px){.tkbig{font-size:46px}.tkcode{font-size:40px}}
+/* điện thoại, chế độ khách: thanh video gọn, nằm cùng hàng với thẻ chọn khu */
+@media (max-width:860px){
+ body.guest #vbar{top:calc(64px + var(--st));left:auto;right:10px;gap:6px;padding:4px;min-height:0;max-width:calc(100vw - 190px)}
+ body.guest #vbar:not(:has(#vUnmute:not([hidden]))):not(:has(#vSync:not([hidden]))){display:none}
+ body.guest #vVol{display:none}
+ body.guest #vbar #vUnmute{height:34px;padding:0 12px;font-size:12px}
+ body.guest #vbar #vSync{width:34px;height:34px;padding:0;font-size:0;border-radius:50%}
+ body.guest #vbar #vSync::before{content:"⟳";font-size:16px;line-height:34px}
+ body.guest #vbar #vSync.ok::before{content:"✓"}
+ body.guest #dock #card{max-width:calc(100vw - 200px)}
+}
+@media (max-width:400px){body.guest #card .zc{display:none}}
 </style>
 </head>
 <body>
