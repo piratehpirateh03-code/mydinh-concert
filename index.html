@@ -343,6 +343,7 @@ summary{padding:0 16px;font-weight:600}summary::after{font-size:18px;color:var(-
  #pop .ph{padding-top:16px}#pop .ph::before{content:"";position:absolute;top:6px;left:50%;width:40px;height:4px;margin-left:-20px;border-radius:4px;background:rgba(255,255,255,.3)}}
 @media (prefers-reduced-motion:reduce){#bTk.soon{animation:none}#pop{animation:none}}
 @keyframes sheetUp{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+#vbar #vSync{width:auto;height:38px;border-radius:999px;padding:0 12px;font-size:12px;font-weight:700;background:rgba(255,255,255,.14);color:#fff;white-space:nowrap;border:1px solid rgba(255,255,255,.25)}#vSync[hidden]{display:none}#vSync.ok{background:rgba(70,200,120,.28);border-color:rgba(70,200,120,.6)}
 #vbar #vUnmute{width:auto;height:38px;border-radius:999px;padding:0 14px;font-size:12.5px;font-weight:700;background:#fff;color:#0b0c14;white-space:nowrap}#vUnmute[hidden]{display:none}
 @media (max-width:860px){#vVol{display:none}}
 
@@ -516,7 +517,7 @@ body.guest #menuBtn{margin-left:auto}
 <div id="screen3" class="scrS" style="display:none"></div>
 <div id="screen4" class="scrS" style="display:none"></div>
 
-<div id="vbar" hidden><button id="vPlay" title="Phát / tạm dừng" aria-label="Phát / tạm dừng">❚❚</button><span id="vName"></span><span id="vTime"></span><input type="range" id="vSeek" min="0" max="1000" value="0" title="Tua"><input type="range" id="vVol" min="0" max="100" value="80" title="Âm lượng"><button id="vUnmute" hidden title="Bật tiếng" aria-label="Bật tiếng">🔊 Bật tiếng</button><button id="vClose" title="Tắt video" aria-label="Tắt video">✕</button></div>
+<div id="vbar" hidden><button id="vPlay" title="Phát / tạm dừng" aria-label="Phát / tạm dừng">❚❚</button><span id="vName"></span><span id="vTime"></span><input type="range" id="vSeek" min="0" max="1000" value="0" title="Tua"><input type="range" id="vVol" min="0" max="100" value="80" title="Âm lượng"><button id="vUnmute" hidden title="Bật tiếng" aria-label="Bật tiếng">🔊 Bật tiếng</button><button id="vSync" hidden title="Đồng bộ lại ngay với chủ phòng" aria-label="Đồng bộ lại với chủ phòng">⟳ Đồng bộ</button><button id="vClose" title="Tắt video" aria-label="Tắt video">✕</button></div>
 
 <header class="bar">
   <div class="brand">
@@ -1287,15 +1288,63 @@ function handleYt(peer,q,nk){const u=typeof q.yt==='string'?q.yt.slice(0,200):nu
   if(SY.yt.get(peer)===u)return;SY.yt.set(peer,u);
   if(!u){if(SY.ytFollow===peer){clearYT();addLine('',nk+' đã tắt video.',null,{sys:true});}return;}
   const pr=parseYT(u);if(!pr||!pr.id)return;const url='https://www.youtube.com/watch?v='+pr.id;
-  if(ytId===pr.id&&!hasLocal&&!ytBlocked){SY.ytFollow=peer;SY.hs=Number.isFinite(q.ys)?q.ys:null;SY.hc=Number.isFinite(q.yc)?q.yc:null;return;}
-  const go=gest=>{$('ytIn').value=url;const ys=Number.isFinite(q.ys)?q.ys:null,yc=Number.isFinite(q.yc)?q.yc:null,st=ys!=null?Math.max(0,(NOW()-ys)/1000):(yc!=null?yc:0),act=gest===true||!!(navigator.userActivation&&navigator.userActivation.hasBeenActive);loadYT(url,ys!=null,{mute:!act,start:st});SY.ytFollow=peer;SY.hs=ys;SY.hc=yc;};
+  if(ytId===pr.id&&!hasLocal&&!ytBlocked){SY.ytFollow=peer;SY.hs=Number.isFinite(q.ys)?q.ys:null;SY.hc=Number.isFinite(q.yc)?q.yc:null;SY.hsA=null;SY.fast=true;return;}
+  const go=gest=>{$('ytIn').value=url;const ys=Number.isFinite(q.ys)?q.ys:null,yc=Number.isFinite(q.yc)?q.yc:null,st=ys!=null?Math.max(0,(NOW()-ys)/1000):(yc!=null?yc:0),act=gest===true||!!(navigator.userActivation&&navigator.userActivation.hasBeenActive);loadYT(url,ys!=null||(yc!=null&&yc<3),{mute:!act||IOS,start:st});SY.ytFollow=peer;SY.hs=ys;SY.hc=yc;SY.hsA=null;SY.fast=true;SY.pst=null;};
   if($('followShow').checked&&!hasLocal){go();addLine('',nk+' đang chiếu video YouTube — bạn đang xem cùng trên màn LED.',null,{sys:true});}
   else addLine('',nk+' đang chiếu một video YouTube.',null,{sys:true,btn:['▶ Xem cùng',()=>go(true)]});}
-function tickFollow(dt){if(!SY.ytFollow||!ytId||ytBlocked||!$('followShow').checked)return;if((tickFollow.t=(tickFollow.t||0)+dt)<.75)return;tickFollow.t=0;
-  if(!YT.muted&&S.ytState!==1&&S.ytState!==3&&SY.hs!=null&&!YT.retried&&Date.now()-(YT.t0||0)>5000){YT.retried=true;YT.muted=true;$('vUnmute').hidden=false;ytCmd('mute');ytCmd('playVideo');} // trình duyệt chặn phát có tiếng: chuyển sang tắt tiếng rồi tự phát
-  if(SY.hs!=null){const tg=(NOW()-SY.hs)/1000,ch=SY.hs!==SY.hsA,n=performance.now();if(S.ytState===2||S.ytState===5||S.ytState===-1)ytCmd('playVideo');
-    if(S.ytState===1&&tg>0){const d=Math.abs(YT.cur-tg);if(ch){SY.hsA=SY.hs;SY.dc=0;if(d>1.2){SY.sk=n;ytCmd('seekTo',[tg+.25,true]);}}else if(d>3.5){if(++SY.dc>=3&&n-(SY.sk||0)>5000){SY.dc=0;SY.sk=n;ytCmd('seekTo',[tg+.25,true]);}}else SY.dc=0;}}
-  else if(SY.hc!=null&&S.ytState===1)ytCmd('pauseVideo');}
+const IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+// vị trí video ước tính ngay lúc này (YouTube chỉ báo currentTime vài lần mỗi giây nên phải cộng thêm thời gian đã trôi)
+function ytEst(){return S.ytState===1?YT.cur+Math.min(1.5,Math.max(0,(performance.now()-(YT.curAt||performance.now()))/1000)):YT.cur;}
+function syncStat(t,ok){const b=$('vSync');if(!b)return;if(b.textContent!==t)b.textContent=t;b.classList.toggle('ok',!!ok);}
+function syncSeek(tg){const n=performance.now();SY.sk=n;SY.dc=0;YT.cur=tg+.35;YT.curAt=n;ytCmd('seekTo',[tg+.35,true]);}
+function syncNow(force){if(force){SY.dc=0;SY.sk=0;SY.hsA=null;SY.fast=true;}try{syncTick();}catch(e){}}
+// khán giả luôn bám theo chủ phòng: chạy bằng setInterval nên không bị ngưng khi tab/điện thoại giảm tải đồ hoạ
+function syncTick(){
+  const fol=!!(SY.ytFollow&&ytId&&!ytBlocked&&!hasLocal&&$('followShow').checked);
+  const sb=$('vSync');if(sb)sb.hidden=!fol;
+  if(!fol||document.hidden)return;
+  const n=performance.now(),st=S.ytState,hs=SY.hs,hc=SY.hc;
+  if(SY.pst===3&&st===1)SY.fast=true;SY.pst=st;
+  // trình duyệt chặn phát có tiếng: chuyển sang tắt tiếng rồi tự phát (bấm "Bật tiếng" sau)
+  if(!YT.muted&&st!==1&&st!==3&&hs!=null&&!YT.retried&&Date.now()-(YT.t0||0)>2500){YT.retried=true;YT.muted=true;$('vUnmute').hidden=false;ytCmd('mute');ytCmd('playVideo');}
+  if(hs!=null){
+    const tg=(NOW()-hs)/1000;
+    if(tg<0){syncStat('⟳ Chờ chủ phòng…');return;}
+    if(st===1){
+      SY.b3=0;
+      const d=Math.abs(ytEst()-tg),ch=hs!==SY.hsA;
+      if(ch){SY.hsA=hs;SY.dc=0;}
+      if(ch||SY.fast){SY.fast=false;if(d>.8&&n-(SY.sk||0)>1000)syncSeek(tg);}
+      else if(d>1){if(++SY.dc>=2&&n-(SY.sk||0)>3000)syncSeek(tg);}
+      else SY.dc=0;
+      syncStat(d>1?'⟳ Đang chỉnh nhịp…':'✓ Đã đồng bộ',d<=1);
+    }else if(st===3){
+      if(!SY.b3)SY.b3=n;
+      // kẹt đang tải quá lâu: tải lại đúng vị trí của chủ phòng
+      if(n-SY.b3>12000&&ytUrl){SY.b3=0;YT.ready=false;loadYT(ytUrl,true,{mute:YT.muted,start:tg});}
+      syncStat('⟳ Đang tải…');
+    }else if(st===0){
+      if(YT.dur&&tg<YT.dur-2&&n-(SY.sk||0)>2500){syncSeek(tg);ytCmd('playVideo');}
+      syncStat('⟳ Đang bắt nhịp…');
+    }else{ // chưa phát / tạm dừng / chưa tải xong
+      if(n-(SY.pl||0)>900){SY.pl=n;ytCmd('playVideo');}
+      SY.fast=true;syncStat('⟳ Đang bắt nhịp…');
+    }
+    // hình đứng im nhưng trạng thái vẫn là "đang phát": tải lại
+    if(st===1&&YT.curAt&&n-YT.curAt>5000&&n-(SY.rl||0)>20000&&ytUrl){SY.rl=n;YT.ready=false;loadYT(ytUrl,true,{mute:YT.muted,start:tg});}
+  }else if(hc!=null){ // chủ phòng đang tạm dừng
+    if(st===1)ytCmd('pauseVideo');
+    if((st===1||st===2||st===5)&&Math.abs(YT.cur-hc)>1.5&&n-(SY.sk||0)>2000){SY.sk=n;ytCmd('seekTo',[hc,true]);}
+    syncStat('❚❚ Chủ phòng tạm dừng');
+  }
+}
+function tickFollow(){}
+setInterval(()=>{try{syncTick();}catch(e){}},400);
+// quay lại tab / bật lại màn hình điện thoại: bắt nhịp ngay
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(()=>syncNow(true),250);});
+addEventListener('pageshow',()=>syncNow(true));addEventListener('online',()=>syncNow(true));
+// chủ phòng chuyển sang app khác: vòng lặp đồ hoạ bị ngưng, vẫn phải giữ phát nhạc, chuyển bài và gửi mốc đồng bộ
+setInterval(()=>{if(document.hidden&&ROOM.host){try{tickRoom(.5);tickNet(.5);}catch(e){}}},500);
 function syncPeers(list){ROOM.peers=list;refreshHost();try{tkPeers(list);}catch(e){}const seen=new Set();let n=0,total=0;
   for(const pr of list){if(pr.kind!=='viewer')continue;total++;if(pr.sameTab)continue;const q=pr.presence||{},nk=cleanText(q.n,16)||'Khách',col=PAL[Math.abs(q.st|0)%PAL.length];
     try{handleChat(pr.peer,q,nk,col);if(pr.peer===ROOM.hostPeer){handleShow(pr.peer,q,nk);handleYt(pr.peer,q,nk);applyHost(q);tkRemote(q);}}catch(e){}
@@ -1314,7 +1363,7 @@ function tickNet(dt){if(!RM||INTRO.on)return;netT+=dt;if(netT<.1&&!forceNet)retu
   const o={x:Math.round(me.x),z:Math.round(me.y),r:+me.rot.toFixed(2),zone:me.zone.label,n:S.nick.slice(0,16),lk:S.look,st:S.stick,m:CH.mine,
     sh:S.show&&!S.show.f?{s:S.show.at,k:+S.show.k.toFixed(4)}:null,yt:null,ys:null,yc:null,j:ROOM.j,u:S.ult?1:0,tx:(ROOM.tx&&ROOM.host&&performance.now()-ROOM.txAt<8000)?ROOM.tx:null,tk:ROOM.host&&TK.at?{a:TK.at,l:TK.lv,s:TK.sd}:null,tw:TK.on&&TK.at?TK.at:null,tr:TK.resA?{a:TK.resA,t:TK.resT,w:TK.resW?1:0}:null,
     pl:ROOM.host&&ROOM.pl.length?ROOM.pl:null,pi:ROOM.host?ROOM.pi:null,rm:ROOM.host?S.mode:null,rl:ROOM.host?(S.lightsOn?1:0):null,rd:ROOM.host?S.dens:null,rc:ROOM.host?S.crowd:null,rf:ROOM.host?(ROOM.rf|0):null};
-  if(ROOM.host&&ytId&&!hasLocal&&ytUrl&&!ytBlocked&&!SY.ytFollow){o.yt=ytUrl;if(S.ytState===1||(S.ytState===3&&SY.anchor!=null)){const a=NOW()-YT.cur*1000;if(SY.anchor==null||Math.abs(a-SY.anchor)>800)SY.anchor=Math.round(a);o.ys=SY.anchor;}else{SY.anchor=null;o.yc=Math.round(YT.cur);}}
+  if(ROOM.host&&ytId&&!hasLocal&&ytUrl&&!ytBlocked&&!SY.ytFollow){o.yt=ytUrl;if(S.ytState===1||(S.ytState===3&&SY.anchor!=null)){const a=Math.round(NOW()-ytEst()*1000);if(SY.anchor==null||(S.ytState===1&&Math.abs(a-SY.anchor)>450))SY.anchor=a;o.ys=SY.anchor;}else{SY.anchor=null;o.yc=Math.round(YT.cur);}}
   const j=JSON.stringify(o);
   if(j!==lastSent){lastSent=j;try{RM.presence(o).catch(()=>{});}catch(e){}}}
 
@@ -1610,7 +1659,7 @@ addEventListener('message',e=>{if(!/^https:\/\/www\.youtube(-nocookie)?\.com$/.t
   if(mm){if(typeof i.playerState==='number')mm.state=i.playerState;if(Number.isFinite(i.currentTime))mm.cur=i.currentTime;if(inferPlay(mm,i.currentTime)&&(mm.state==null||mm.state===-1||mm.state===5||mm.state===0))mm.state=1;return;}
   YT.ready=true;if(i.videoData&&typeof i.videoData.video_id==='string')YT.vid=i.videoData.video_id;
   if(typeof i.playerState==='number'){S.ytState=i.playerState;if(!hasLocal)$('vPlay').textContent=i.playerState===1?'❚❚':'▶';}
-  if(Number.isFinite(i.duration)&&i.duration>0)YT.dur=i.duration;if(Number.isFinite(i.currentTime))YT.cur=i.currentTime;
+  if(Number.isFinite(i.duration)&&i.duration>0)YT.dur=i.duration;if(Number.isFinite(i.currentTime)){YT.cur=i.currentTime;YT.curAt=performance.now();}
   if(inferPlay(YT,i.currentTime)&&(S.ytState==null||S.ytState===-1||S.ytState===5||S.ytState===0)){S.ytState=1;if(!hasLocal)$('vPlay').textContent='❚❚';}
   if(!hasLocal&&YT.dur&&!seeking)$('vSeek').value=YT.cur/YT.dur*1000;}catch(err){}});
 const YTERR={2:'Link video không hợp lệ.',5:'Trình duyệt không phát được video này.',100:'Video không tồn tại hoặc đã bị đặt riêng tư.',101:'Chủ video không cho phát ở trang khác — hãy chọn video khác (thường là bản lyric, fancam, live stage).',150:'Chủ video không cho phát ở trang khác — hãy chọn video khác (thường là bản lyric, fancam, live stage).',152:'YouTube từ chối nguồn phát của trang này.',153:'YouTube cần trang được mở qua địa chỉ web (http/https). Hãy mở game bằng file Mo-Concert.bat hoặc từ trang web, không mở trực tiếp file.'};
@@ -1677,7 +1726,7 @@ function ytFail(){if(ytBlocked||!ytId)return;ytBlocked=true;scr.querySelector('i
   $('note').textContent='Khung xem này không cho nhúng video YouTube. Bấm "Mở YouTube ↗" ở thanh trên để nghe ở tab khác, hoặc dùng "Tải video" để chiếu thẳng lên màn LED.';}
 document.addEventListener('securitypolicyviolation',e=>{if(/frame|child|default/.test(e.violatedDirective||'')&&/youtube/.test(e.blockedURI||''))ytFail();});
 function unmuteYT(){if(!YT.muted||!ytId||hasLocal)return;YT.muted=false;$('vUnmute').hidden=true;ytCmd('unMute');ytCmd('setVolume',[+$('vVol').value]);if(SY.ytFollow&&SY.hs!=null){const tg=(NOW()-SY.hs)/1000;if(tg>0&&Math.abs(YT.cur-tg)>.8)ytCmd('seekTo',[tg,true]);ytCmd('playVideo');}}
-$('vUnmute').onclick=unmuteYT;for(const ev of['pointerdown','keydown','touchend'])addEventListener(ev,unmuteYT,true);
+$('vUnmute').onclick=unmuteYT;$('vSync').onclick=()=>{unmuteYT();syncNow(true);};for(const ev of['pointerdown','keydown','touchend'])addEventListener(ev,unmuteYT,true);
 $('ytForm').addEventListener('submit',e=>{e.preventDefault();if(!ROOM.host)return;clearTimeout(YTS.timer);const v=$('ytIn').value.trim();if(!v)return;
   if(isLink(v)){if(plAdd(v)){$('ytIn').value='';YTS.close();}$('ytIn').blur();}else YTS.run(v);});
 
@@ -1966,7 +2015,7 @@ addEventListener('keydown',e=>{if(!TK.on)return;e.stopImmediatePropagation();
 tkLoad();
 if(S.ult){tkOwn();setNick(S.nick);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>setNick(S.nick));}
 setInterval(tkTick,500);tkTick();
-window.__sim={TK,tkOpen,tkBots,tkLB,tkClose,tkCnt,tkKth,tkPeers,tkRemote,tkSched,tkSlot,plRender,hostXfer,popSet,bTkUpd,tkQuota,tkHist,YTS,ytSearch,ROOM,plAdd,plPlay,plNext,renderPL,refreshHost,INTRO,ledHole,ledMain,fohMesh,sendChat,joinCode,Q,joy,AUD,peersMap,emote,startShow,vid,keys,S,me,cam,zones,goZone,overview,perf,loadYT,handleYt,SY,YT,MIRS};
+window.__sim={syncTick,syncNow,ytEst,TK,tkOpen,tkBots,tkLB,tkClose,tkCnt,tkKth,tkPeers,tkRemote,tkSched,tkSlot,plRender,hostXfer,popSet,bTkUpd,tkQuota,tkHist,YTS,ytSearch,ROOM,plAdd,plPlay,plNext,renderPL,refreshHost,INTRO,ledHole,ledMain,fohMesh,sendChat,joinCode,Q,joy,AUD,peersMap,emote,startShow,vid,keys,S,me,cam,zones,goZone,overview,perf,loadYT,handleYt,SY,YT,MIRS};
 // một lỗi lẻ không được làm đứng cả game: báo ra khung chat rồi chạy tiếp
 function loopErr(e){if(loopErr.n)return;loopErr.n=1;try{addLine('','Lỗi khi dựng hình: '+String((e&&e.message)||e).slice(0,140),null,{sys:true});openChat();}catch(x){}}
 let last=performance.now();
