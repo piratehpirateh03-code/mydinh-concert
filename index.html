@@ -1357,8 +1357,8 @@ function frameLED(){const ey=me.h+27,ex=me.x,ez=me.y,tx=800-ex,ty=LCY-ey,tz=LED.
   camera.fov=fov;camera.updateProjectionMatrix();cam.fy=Math.atan2(tx,tz);cam.fpp=Math.asin(fy);
   if(pw)cam.fy-=Math.atan(pw/W*Math.tan(fov*D2R/2)*W/H);}
 function enterFP(){cam.mode='fp';frameLED();
-  chr.root.visible=false;ring.visible=false;nickS.visible=false;fpHold.add(stick);stick.position.set(0,0,0);stick.rotation.set(0,0,0);}
-function exitFP(){cam.mode='follow';chr.root.visible=true;ring.visible=true;nickS.visible=true;chr.armR.add(stick);stick.position.set(0,-11.5,0);stick.rotation.set(Math.PI,0,0);
+  chr.root.visible=false;ring.visible=false;nickS.visible=false;fpHold.visible=false;fpHold.add(stick);stick.position.set(0,0,0);stick.rotation.set(0,0,0);}
+function exitFP(){cam.mode='follow';fpHold.visible=true;chr.root.visible=true;ring.visible=true;nickS.visible=true;chr.armR.add(stick);stick.position.set(0,-11.5,0);stick.rotation.set(Math.PI,0,0);
   camera.fov=55;camera.updateProjectionMatrix();}
 let W=0,H=0;
 function resize(){W=innerWidth;H=innerHeight;renderer.setSize(W,H,false);camera.aspect=W/H;camera.updateProjectionMatrix();}
@@ -1523,7 +1523,7 @@ function syncPeers(list){ROOM.peers=list;refreshHost();try{tkPeers(list);}catch(
     {const gk=q.u?1:0,nk2=nk+'|'+gk;if(nk2!==p.nick){p.nick=nk2;drawNick(p.c,p.t,nk,gk);p.gs.visible=!!gk;}}p.bm.color.copy(PC[Math.abs(q.st|0)%PAL.length]);}
   for(const[k,p]of peersMap)if(!seen.has(k)){scene.remove(p.g);peersMap.delete(k);}
   const el=$('ppl');el.hidden=false;el.textContent='🏠 '+(ROOM.kind==='priv'?ROOM.code.toUpperCase():'Phòng chung')+' · '+(total>1?total+' người':'chỉ mình bạn')+(ROOM.host&&!INTRO.on?' · 👑 chủ phòng':'');try{INTRO.refresh&&INTRO.refresh();roomUI();}catch(e){}}
-function updatePeers(dt,t){for(const p of peersMap.values()){const dx=p.tx-p.x,dz=p.tz-p.z,d=Math.hypot(dx,dz);if(d>700){p.x=p.tx;p.z=p.tz;}else if(d>.5){const v=Math.min(d,Math.max(150,d*3)*dt);p.x+=dx/d*v;p.z+=dz/d*v;}
+function updatePeers(dt,t){const fpv=cam.mode==='fp';for(const p of peersMap.values()){p.g.children[0].visible=!fpv;if(fpv){p.gs.visible=false;p._h=1;}else if(p._h){p._h=0;p.gs.visible=/\|1$/.test(p.nick||'');}const dx=p.tx-p.x,dz=p.tz-p.z,d=Math.hypot(dx,dz);if(d>700){p.x=p.tx;p.z=p.tz;}else if(d>.5){const v=Math.min(d,Math.max(150,d*3)*dt);p.x+=dx/d*v;p.z+=dz/d*v;}
     const mv=d>2,w=mv?Math.sin(t*11)*.7:0,c=p.char;p.g.position.set(p.x,terr(p.x,p.z)+(mv?0:Math.abs(Math.sin(S.beat*Math.PI))*3),p.z);p.bub.sp.visible=S.t<p.bub.until;if(p.gs.visible)p.gs.position.y=67+Math.sin(t*2+p.x)*1.2;
     if(c){c.root.rotation.y=p.rot;c.legL.rotation.x=w;c.legR.rotation.x=-w;c.armL.rotation.x=-w;c.armR.rotation.x=Math.PI+.3;c.armR.rotation.z=Math.sin(S.beat*Math.PI)*.3;}}
   heroGold.visible=!!S.ult&&cam.mode!=='fp';heroGold.position.y=73+Math.sin(t*2)*1.2;myBubble.sp.visible=S.t<myBubble.until&&cam.mode!=='fp';}
