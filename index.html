@@ -289,7 +289,15 @@ summary{padding:0 16px;font-weight:600}summary::after{font-size:18px;color:var(-
 #card[aria-expanded=true] .zv{transform:rotate(180deg)}#card[aria-expanded=true]{border-color:rgba(255,216,74,.6)}
 #card:hover{background:rgba(30,33,50,.9)}#card:focus-visible{outline:3px solid #fff;outline-offset:3px}
 #pop.atL{left:12px;transform:none;bottom:calc(70px + var(--sb))}
-#pop #zoneSec .tiers button{min-height:40px}#pop #zoneSec .sel{width:100%;min-height:42px}
+#pop #zoneSec .tiers button{min-height:40px}
+.blocks{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px;margin:10px 0 8px}
+.blocks button{min-height:42px;border:1px solid var(--line);border-left:4px solid var(--c,#fff);border-radius:10px;background:rgba(255,255,255,.06);color:var(--ink);font:inherit;font-size:12.5px;font-weight:700;padding:6px 8px;cursor:pointer;text-align:left;line-height:1.2}
+.blocks button small{display:block;font-weight:500;font-size:10.5px;color:var(--dim);margin-top:2px}
+.blocks button:hover{background:rgba(255,255,255,.14)}
+.blocks button.on{background:var(--c,#fff);border-color:var(--c,#fff);color:#10121b}.blocks button.on small{color:rgba(16,18,27,.75)}
+.blocks button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.bhead{font-size:12px;color:var(--dim);margin:10px 0 0;font-weight:700;letter-spacing:.02em}
+#intro .blocks{grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:5px;margin:8px 0 4px}#intro .blocks button{min-height:40px;font-size:12px;padding:5px 7px}
 @media (max-width:860px){
  #dock #card{display:flex;gap:8px;pointer-events:auto;padding:8px 12px;border-radius:999px;max-width:calc(100vw - 20px)}
  #card .zn{font-size:13px}
@@ -578,9 +586,10 @@ body.guest #menuBtn{margin-left:auto}
   </div>
   </div></details>
   <details id="zoneSec"><summary>Hạng vé · bấm để tới khu</summary><div class="dbody">
-  <div class="opt2">Chọn một block để tới ngay, hoặc bấm vào hạng vé để tới khu đầu tiên của hạng đó.</div>
-  <select class="sel" id="blockSel"><option value="">— Chọn block để tới ngay —</option></select>
+  <div class="opt2">Bước 1: chọn hạng vé. Bước 2: bấm đúng block bạn muốn tới.</div>
   <div class="tiers" id="tiers"></div>
+  <div class="bhead" id="bhead"></div>
+  <div class="blocks" id="blockGrid" role="group" aria-label="Chọn block"></div>
   <button class="btn wide" id="labelBtn">🏷 Hiện tên khu trên sân</button>
   </div></details>
   <details open id="plSec"><summary>👥 Người trong phòng <em id="plCnt">1</em></summary><div class="dbody"><div id="memList"></div><div class="opt2">Chủ phòng bấm "Trao quyền" để nhường quyền điều khiển nhạc, hiệu ứng và khán giả cho người khác.</div></div></details>
@@ -657,9 +666,9 @@ body.guest #menuBtn{margin-left:auto}
   </section>
   <section data-s="4" hidden>
     <div class="rban" id="rBanner"></div>
-    <h2>Chọn khu vực</h2><p class="sub">Bấm vào một khu trên sân (đang hiện tên khu), hoặc chọn theo hạng vé bên dưới.</p>
+    <h2>Chọn khu vực</h2><p class="sub">Bấm vào một khu trên sân, hoặc chọn hạng vé rồi chọn đúng block bạn muốn bên dưới.</p>
     <div class="tiers" id="itiers"></div>
-    <select id="iblock" aria-label="Chọn block"><option value="">— Hoặc chọn block cụ thể —</option></select>
+    <div class="bhead" id="ibhead"></div><div class="blocks" id="iblockGrid" role="group" aria-label="Chọn block"></div>
     <div id="izone">Chưa chọn khu nào.</div>
   </section>
   <div class="nav"><button id="iBack" type="button" hidden>Quay lại</button><button id="iNext" class="go" type="button">Tiếp tục</button></div>
@@ -1676,7 +1685,12 @@ $('ytForm').addEventListener('submit',e=>{e.preventDefault();if(!ROOM.host)retur
 const card=$('card');
 function showCard(){const z=S.sel;const T=TIERS[z.tier];card.style.setProperty('--c',T.c);
   card.innerHTML=`<i class="zd"></i><b class="zn">${z.label}</b><span class="zc">Đổi khu</span><svg class="zv" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>`;card.setAttribute('aria-label','Khu của bạn: '+z.label+'. Bấm để đổi khu');
-  document.querySelectorAll('#tiers button').forEach(b=>b.classList.toggle('on',b.dataset.t===z.tier));}
+  viewTier=z.tier;drawBlocks();}
+var viewTier=null;
+function drawBlocks(){const g=$('blockGrid');if(!g)return;const k=viewTier||S.sel.tier,T=TIERS[k];
+  document.querySelectorAll('#tiers button').forEach(b=>b.classList.toggle('on',b.dataset.t===k));
+  $('bhead').textContent=T.n+' · '+T.price+' · '+zones.filter(z=>z.tier===k).length+' block';g.innerHTML='';g.style.setProperty('--c',T.c);
+  zones.filter(z=>z.tier===k).forEach(z=>{const b=document.createElement('button');b.type='button';b.style.setProperty('--c',T.c);b.innerHTML=z.label+'<small>'+(z.standing?'Khu đứng':'Ghế ngồi')+'</small>';b.classList.toggle('on',z===S.sel);b.setAttribute('aria-pressed',z===S.sel);b.onclick=()=>goZone(z,null,null,true);g.appendChild(b);});}
 function goZone(z,x,y,inst){if(MOB())closeSheet();if(window.__popZ)popSet('');S.sel=z;me.zone=z;const good=(a,b)=>a!=null&&inPoly(z.poly,a,b)&&cellZone(a,b)===z.i;
   if(!good(x,y)){x=z.c[0];y=z.c[1];if(!good(x,y)){const c=cells[z.cells[z.cells.length>>1]];x=c.x;y=c.z;}}
   me.tx=x;me.ty=y;me.travel=true;showCard();follow(z.sp?250:340);cam.pitch=z.sp?.72:.3;
@@ -1684,15 +1698,13 @@ function goZone(z,x,y,inst){if(MOB())closeSheet();if(window.__popZ)popSet('');S.
 const tiersEl=$('tiers');
 for(const k in TIERS){const T=TIERS[k],b=document.createElement('button');b.dataset.t=k;b.style.setProperty('--c',T.c);
   b.innerHTML=`<i></i><span>${T.n}</span><em>${T.price.replace('.000đ','k')}</em>`;
-  b.onclick=()=>{const list=zones.filter(z=>z.tier===k);goZone(list[(list.indexOf(S.sel)+1)%list.length]);};tiersEl.appendChild(b);}
+  b.onclick=()=>{viewTier=k;drawBlocks();};tiersEl.appendChild(b);}
 const seg=(id,key,cb)=>$(id).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S[key]=b.dataset.v;
   [...$(id).children].forEach(c=>c.classList.toggle('on',c===b));cb&&cb();});
 seg('modeSeg','mode',()=>{stopShow();setMode(S.mode);if(S.mode==='encore')fireworksFx();});
 $('showBtn').onclick=()=>{S.show?stopShow():startShow();};
 $('qSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;Q.mode=b.dataset.v;[...$('qSeg').children].forEach(c=>c.classList.toggle('on',c===b));Q.L=Q.mode==='low'?2:0;Q.low=Q.high=0;applyQ();});
 $('emo').addEventListener('click',e=>{const b=e.target.closest('button');if(b)emote(b.dataset.e);});
-{const sel=$('blockSel');for(const k in TIERS){const og=document.createElement('optgroup');og.label=TIERS[k].n+' · '+TIERS[k].price;zones.filter(z=>z.tier===k).forEach(z=>{const o=document.createElement('option');o.value=z.i;o.textContent=z.label+(z.standing?' (đứng)':'');og.appendChild(o);});sel.appendChild(og);}
- sel.onchange=()=>{if(sel.value==='')return;goZone(zones[+sel.value],null,null,true);sel.blur();};}
 seg('crowdSeg','crowd');
 $('densSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S.dens=+b.dataset.v;[...$('densSeg').children].forEach(c=>c.classList.toggle('on',c===b));applyDensity();showCard();try{localStorage.setItem('mdsim.dens',b.dataset.v);}catch(e){}});
 function MOB(){return innerWidth<=860;}
@@ -1756,16 +1768,16 @@ rebuildChar();setNick(S.nick);if(document.fonts&&document.fonts.ready)document.f
 
 /* ───────── Màn chào: nhân vật → nickname → phòng → zone → vào sân ───────── */
 const INTRO={on:true,step:1,zone:null,lab:false,kind:'pub',code:''};
-{const el=$('intro'),secs=[...el.querySelectorAll('section')],dots=[...el.querySelectorAll('.isteps i')],back=$('iBack'),next=$('iNext'),inick=$('inick'),err=$('inickErr'),iz=$('izone'),isel=$('iblock'),itiers=$('itiers'),rk=$('rkSeg'),rcode=$('rcode'),rerr=$('rErr'),rban=$('rBanner');
+{const el=$('intro'),secs=[...el.querySelectorAll('section')],dots=[...el.querySelectorAll('.isteps i')],back=$('iBack'),next=$('iNext'),inick=$('inick'),err=$('inickErr'),iz=$('izone'),igrid=$('iblockGrid'),itiers=$('itiers'),rk=$('rkSeg'),rcode=$('rcode'),rerr=$('rErr'),rban=$('rBanner');
   document.body.classList.add('intro');INTRO.lab=S.labels;
   const stand=zones.find(z=>z.standing)||zones[0];
   me.zone=stand;S.sel=stand;{const c=stand.c;me.x=c[0];me.y=c[1];me.h=terr(c[0],c[1]);me.travel=false;me.tx=null;cam.tgt.set(me.x,me.h+26,me.y);}
   me.rot=0;follow(135);cam.pitch=.16;cam.yaw=.25;
   for(const k in TIERS){const T=TIERS[k],b=document.createElement('button');b.dataset.t=k;b.style.setProperty('--c',T.c);b.innerHTML=`<i></i><span>${T.n}</span><em>${T.price.replace('.000đ','k')}</em>`;
-    b.onclick=()=>{const list=zones.filter(z=>z.tier===k);INTRO.pick(list[(list.indexOf(INTRO.zone)+1)%list.length]);};itiers.appendChild(b);
-    const og=document.createElement('optgroup');og.label=T.n+' · '+T.price;zones.filter(z=>z.tier===k).forEach(z=>{const o=document.createElement('option');o.value=z.i;o.textContent=z.label+(z.standing?' (đứng)':'');og.appendChild(o);});isel.appendChild(og);}
-  isel.onchange=()=>{if(isel.value!=='')INTRO.pick(zones[+isel.value]);};
-  INTRO.pick=z=>{if(!z)return;INTRO.zone=z;const T=TIERS[z.tier];isel.value=String(z.i);iz.style.setProperty('--c',T.c);
+    b.onclick=()=>{const list=zones.filter(z=>z.tier===k);INTRO.pick(INTRO.zone&&INTRO.zone.tier===k?INTRO.zone:list[0]);};itiers.appendChild(b);}
+  const drawIB=z=>{const T=TIERS[z.tier];$('ibhead').textContent=T.n+' · '+T.price+' · chọn một block';igrid.innerHTML='';
+    zones.filter(q=>q.tier===z.tier).forEach(q=>{const b=document.createElement('button');b.type='button';b.style.setProperty('--c',T.c);b.innerHTML=q.label+'<small>'+(q.standing?'Khu đứng':'Ghế ngồi')+'</small>';b.classList.toggle('on',q===z);b.setAttribute('aria-pressed',q===z);b.onclick=()=>INTRO.pick(q);igrid.appendChild(b);});};
+  INTRO.pick=z=>{if(!z)return;INTRO.zone=z;const T=TIERS[z.tier];drawIB(z);iz.style.setProperty('--c',T.c);
     iz.innerHTML=`<b>${z.label}</b><br>${T.price} · Vé ${T.type.toLowerCase()} · ${z.standing?'khu đứng, đi lại tự do':'khu ghế ngồi, góc nhìn từ ghế của bạn'}`;
     itiers.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.t===z.tier));
     cam.mode='free';cam.tgt.set(z.c[0],10,z.c[1]);cam.dist=z.sp?900:650;cam.pitch=.7;next.disabled=false;};
