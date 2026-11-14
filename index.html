@@ -760,8 +760,11 @@ const cells=[],starCells=[],stCells=[],rwCells=[];
     else if(segD(cx,cz,800,430,800,869)<22||segD(cx,cz,420,358,800,900)<15||segD(cx,cz,1180,358,800,900)<15){h=30;c=0xffffff;kind=2;}
     else if(inR(cx,cz,[378,320,422,365])){h=34;c=0x6a6f80;}
     else if(inR(cx,cz,[268,280,290,300])||inR(cx,cz,[510,280,532,300])||inR(cx,cz,[390,375,410,395])){h=64;c=0x15161d;}
-    else{const z=zoneAt(cx,cz);if(z){h=4;zi=z.i;}else if(d>-58){h=2;c=0x55282c;}else{h=2;c=0x1b1e2b;}}
-    const col=new THREE.Color(zi>=0?TIERS[zones[zi].tier].c:c).multiplyScalar(.82+rnd()*.18);
+    else{const z=zoneAt(cx,cz);if(z){h=4;zi=z.i;}else if(d>-58){h=2;c=0xb04a32;}else{h=2;c=0x1b1e2b;}}
+    // khán đài: hàng ghế sáng/tối xen kẽ theo bậc, lối đi bậc thang màu xi măng cắt dọc khán đài
+    let base=zi>=0?TIERS[zones[zi].tier].c:c;const seat=zi>=0&&d>=0;
+    if(seat){const p=cz>CY1&&cz<CY2?cz:((Math.atan2(cz-(cz<=CY1?CY1:CY2),cx-CX)+TAU)%TAU)*(500+d);if(Math.floor(p/G)%7===0)base=0x8d93a3;}
+    const col=new THREE.Color(base).multiplyScalar(seat?(Math.floor(d/G)%2?.8:1)*(.95+rnd()*.05):.82+rnd()*.18);
     const i=b*GX+a;gH[i]=h;gZone[i]=zi;const n=cells.length;cells.push({x:cx,z:cz,h,full,col});
     if(zi>=0)(zones[zi].cells=zones[zi].cells||[]).push(n);if(star)starCells.push(n);if(kind===1)stCells.push(n);if(kind===2)rwCells.push(n);}
 })();
@@ -847,6 +850,29 @@ const paint=(list,m,base)=>{for(const i of list)blocks.setColorAt(i,base?tcol.co
  {const c=document.createElement('canvas');c.width=1024;c.height=96;const x=c.getContext('2d');x.fillStyle='#0f2a6b';x.fillRect(0,0,1024,96);x.fillStyle='#fff';x.font='800 50px "Be Vietnam Pro",system-ui,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText('SÂN VẬN ĐỘNG QUỐC GIA MỸ ĐÌNH',512,50);
   const t=new THREE.CanvasTexture(c);const m=new THREE.Mesh(new THREE.PlaneGeometry(560,52),new THREE.MeshBasicMaterial({map:t,fog:false}));m.position.set(CX-760,166,(CY1+CY2)/2);m.rotation.y=-Math.PI/2;scene.add(m);
   const m2=m.clone();m2.position.x=CX+760;m2.rotation.y=Math.PI/2;scene.add(m2);}
+}
+
+// nội thất kiểu Mỹ Đình: đường chạy điền kinh có vạch làn, vòng LED quảng cáo quanh sân, dải phòng VIP giữa hai tầng khán đài A/B, bảng điện tử trên khán đài D
+{const lm=new THREE.LineBasicMaterial({color:0xf2f2f2,transparent:true,opacity:.55});
+ for(let k=0;k<=8;k++){const r=443+k*7,pts=capShape(r).getPoints(60).map(p=>V(p.x,2.5,p.y));scene.add(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(pts),lm));}
+ // vòng LED quảng cáo mép sân, màu chạy vòng
+ const sp=capShape(438).getSpacedPoints(160),N=160,ad=new THREE.InstancedMesh(new THREE.BoxGeometry(1,10,2),new THREE.MeshBasicMaterial({fog:false}),N),AC=[0xff4d6d,0xb06bff,0x4dd2ff,0xffd84a].map(c=>new THREE.Color(c));
+ for(let k=0;k<N;k++){const a=sp[k],b=sp[(k+1)%N],dx=b.x-a.x,dz=b.y-a.y,L=Math.hypot(dx,dz);DUM.position.set((a.x+b.x)/2,7,(a.y+b.y)/2);DUM.rotation.set(0,-Math.atan2(dz,dx),0);DUM.scale.set(L*.96,1,1);DUM.updateMatrix();ad.setMatrixAt(k,DUM.matrix);ad.setColorAt(k,AC[0]);}
+ scene.add(ad);let adT=0;setInterval(()=>{adT++;for(let k=0;k<N;k++)ad.setColorAt(k,AC[Math.floor((k+adT)/10)%4]);ad.instanceColor.needsUpdate=true;},140);
+ // dải phòng VIP / khu báo chí bằng kính trên vách giữa hai tầng khán đài A (tây) và B (đông)
+ const wc=document.createElement('canvas');wc.width=256;wc.height=32;{const x=wc.getContext('2d');x.fillStyle='#0b1424';x.fillRect(0,0,256,32);for(let i=0;i<16;i++){x.fillStyle=i%5===2?'#2a3b5c':'#ffcf7a';x.globalAlpha=i%5===2?1:.55+((i*37)%5)/12;x.fillRect(i*16+2,6,12,20);}x.globalAlpha=1;}
+ const wt=new THREE.CanvasTexture(wc);wt.wrapS=THREE.RepeatWrapping;wt.repeat.set(6,1);
+ for(const side of[0,1]){const m=new THREE.Mesh(new THREE.PlaneGeometry(CY2-CY1-40,24),new THREE.MeshBasicMaterial({map:wt,fog:false}));m.position.set(side?CX+600.5:CX-600.5,96,(CY1+CY2)/2);m.rotation.y=side?-Math.PI/2:Math.PI/2;scene.add(m);}
+ // bảng điện tử lớn trên đỉnh khán đài D, quay về phía sân khấu; đồng hồ chạy theo giờ thật
+ const zS=CY2+748,sc=document.createElement('canvas');sc.width=1024;sc.height=320;const sx=sc.getContext('2d'),st=new THREE.CanvasTexture(sc);
+ const drawSB=()=>{sx.fillStyle='#04060c';sx.fillRect(0,0,1024,320);sx.strokeStyle='#ffd84a';sx.lineWidth=6;sx.strokeRect(10,10,1004,300);sx.textAlign='center';sx.textBaseline='middle';
+   sx.fillStyle='#9fb4ff';sx.font='700 40px "Be Vietnam Pro",system-ui,sans-serif';sx.fillText('SVĐ QUỐC GIA MỸ ĐÌNH',512,62);
+   sx.fillStyle='#ffd84a';sx.font='800 64px Unbounded,"Be Vietnam Pro",sans-serif';sx.fillText('BIGBANG <XX : COSMOS>',512,150);
+   const d=new Date();sx.fillStyle='#fff';sx.font='800 72px ui-monospace,monospace';sx.fillText([d.getHours(),d.getMinutes(),d.getSeconds()].map(v=>String(v).padStart(2,'0')).join(':'),512,246);st.needsUpdate=true;};
+ drawSB();setInterval(drawSB,1000);
+ const fr=new THREE.Mesh(new THREE.BoxGeometry(372,122,10),lam(0x10121a));fr.position.set(CX,300,zS+6);scene.add(fr);
+ const sbm=new THREE.Mesh(new THREE.PlaneGeometry(360,112),new THREE.MeshBasicMaterial({map:st,fog:false}));sbm.position.set(CX,300,zS);sbm.rotation.y=Math.PI;scene.add(sbm);
+ for(const lx of[CX-140,CX+140]){const p=new THREE.Mesh(new THREE.BoxGeometry(10,100,10),lam(0x2a2d38));p.position.set(lx,240,zS+8);scene.add(p);}
 }
 
 // zones
