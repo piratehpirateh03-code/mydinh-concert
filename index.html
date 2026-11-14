@@ -852,6 +852,46 @@ const paint=(list,m,base)=>{for(const i of list)blocks.setColorAt(i,base?tcol.co
   const m2=m.clone();m2.position.x=CX+760;m2.rotation.y=Math.PI/2;scene.add(m2);}
 }
 
+// đèn chiếu lên trời phía sau sân khấu chính, khán giả nhảy múa ngoài sân, bảng LED + banner quảng bá concert bên ngoài
+{const outN=(x,z)=>{const cz=Math.min(CY2,Math.max(CY1,z)),dx=x-CX,dz=z-cz,l=Math.hypot(dx,dz)||1;return[dx/l,dz/l];};
+ // 1) đèn rọi trời: chùm hình nón mờ dần lên cao, quét qua lại
+ const gc=document.createElement('canvas');gc.width=4;gc.height=128;{const x=gc.getContext('2d'),g=x.createLinearGradient(0,128,0,0);g.addColorStop(0,'#fff');g.addColorStop(.35,'#777');g.addColorStop(1,'#000');x.fillStyle=g;x.fillRect(0,0,4,128);}
+ const gt=new THREE.CanvasTexture(gc),bg=new THREE.CylinderGeometry(46,4,2200,16,1,true);bg.translate(0,1100,0);
+ const SKY=[];[[520,0xbfd8ff],[630,0xff7ac8],[740,0xffffff],[860,0xffffff],[970,0x8fd0ff],[1080,0xd9a6ff]].forEach(([x,c],i)=>{
+   const m=new THREE.Mesh(bg,new THREE.MeshBasicMaterial({map:gt,color:c,transparent:true,opacity:.2,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide,fog:false}));
+   m.position.set(x,236,222);m.renderOrder=3;scene.add(m);const hd=new THREE.Mesh(new THREE.BoxGeometry(16,10,16),new THREE.MeshBasicMaterial({color:c,fog:false}));hd.position.set(x,236,222);scene.add(hd);SKY.push({m,ph:i*1.3});});
+ // 2) nhóm khán giả ngoài sân: mỗi nhóm 5–8 người quây vòng, nhún nhảy và giơ lightstick
+ const OUT=[];{let sd=21;const rn=()=>(sd=(sd*16807)%2147483647)/2147483647;const cs=capShape(870).getSpacedPoints(22);
+  for(let g=0;g<22;g++){const c=cs[g],n=5+(rn()*4|0);for(let k=0;k<n;k++){const a=k/n*TAU+rn()*.4,r=16+rn()*10;OUT.push({x:c.x+Math.cos(a)*r,z:c.y+Math.sin(a)*r,ry:Math.atan2(-Math.cos(a),-Math.sin(a)),ph:rn()*TAU,sp:5+rn()*3,col:PAL[rn()*PAL.length|0]});}}}
+ const ON=OUT.length,oBody=new THREE.InstancedMesh(new THREE.BoxGeometry(8,18,5),lam(0xffffff),ON),oHead=new THREE.InstancedMesh(new THREE.BoxGeometry(7,7,7),lam(0xe8b48a),ON),oStick=new THREE.InstancedMesh(new THREE.BoxGeometry(3,3,3),new THREE.MeshBasicMaterial({color:0xffffff,fog:false}),ON);
+ const SH=[0x2b3a67,0xf2f2f2,0x111318,0x7a1f2b,0x2f6f4e,0x4a3b8c],tc=new THREE.Color();
+ OUT.forEach((o,i)=>{oBody.setColorAt(i,tc.set(SH[i%SH.length]));oStick.setColorAt(i,tc.set(o.col));});[oBody,oHead,oStick].forEach(m=>{m.frustumCulled=false;scene.add(m);});
+ // 3) bảng LED quảng bá đặt quanh quảng trường + banner dọc trên mặt ngoài sân
+ const lc=document.createElement('canvas');lc.width=768;lc.height=384;const lx=lc.getContext('2d'),lt=new THREE.CanvasTexture(lc);
+ const SL=[['BIGBANG','<XX : COSMOS>','#ffd84a','#3a0d5c'],['20 NĂM BIGBANG','CONCERT TẠI HÀ NỘI','#ffffff','#0f2a6b'],['24 – 25.10.2026','SVĐ QUỐC GIA MỸ ĐÌNH','#ffd84a','#5c0d24'],['XX : COSMOS','WORLD TOUR · HANOI','#9fe7ff','#06202e']];
+ const drawLed=k=>{const[a,b,fc,bc]=SL[k%SL.length],g=lx.createLinearGradient(0,0,768,384);g.addColorStop(0,bc);g.addColorStop(1,'#05060b');lx.fillStyle=g;lx.fillRect(0,0,768,384);
+   lx.strokeStyle=fc;lx.lineWidth=8;lx.strokeRect(14,14,740,356);lx.textAlign='center';lx.textBaseline='middle';lx.fillStyle=fc;lx.font='800 92px Unbounded,"Be Vietnam Pro",sans-serif';lx.fillText(a,384,150,700);
+   lx.fillStyle='#fff';lx.font='700 48px "Be Vietnam Pro",system-ui,sans-serif';lx.fillText(b,384,262,700);lt.needsUpdate=true;};
+ drawLed(0);let lk=0;setInterval(()=>drawLed(++lk),3500);
+ const ledM=new THREE.MeshBasicMaterial({map:lt,fog:false}),dk=lam(0x14161f);
+ [[CX-930,(CY1+CY2)/2],[CX+930,(CY1+CY2)/2],[CX,CY2+930],[CX-560,CY2+700],[CX+560,CY2+700],[CX-560,CY1-640],[CX+560,CY1-640]].forEach(([x,z])=>{const[nx,nz]=outN(x,z),ry=Math.atan2(nx,nz);
+   const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=ry;const sc=new THREE.Mesh(new THREE.PlaneGeometry(200,100),ledM);sc.position.set(0,120,1);g.add(sc);
+   const bk=new THREE.Mesh(new THREE.BoxGeometry(208,108,6),dk);bk.position.set(0,120,-3);g.add(bk);for(const px of[-70,70]){const p=new THREE.Mesh(new THREE.BoxGeometry(8,70,8),dk);p.position.set(px,35,-3);g.add(p);}scene.add(g);});
+ // banner dọc treo trên mặt ngoài
+ const bc=document.createElement('canvas');bc.width=96;bc.height=384;{const x=bc.getContext('2d'),g=x.createLinearGradient(0,0,0,384);g.addColorStop(0,'#ffd84a');g.addColorStop(1,'#b06bff');x.fillStyle=g;x.fillRect(0,0,96,384);x.fillStyle='#0b0c14';x.save();x.translate(56,192);x.rotate(-Math.PI/2);x.textAlign='center';x.textBaseline='middle';x.font='800 50px Unbounded,"Be Vietnam Pro",sans-serif';x.fillText('BIGBANG',0,0);x.restore();x.font='700 18px "Be Vietnam Pro",sans-serif';x.textAlign='center';x.fillText('XX:COSMOS',48,370);}
+ const bm=new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(bc),fog:false});
+ capShape(758).getSpacedPoints(28).slice(0,28).forEach((p,i)=>{if(i%2)return;const[nx,nz]=outN(p.x,p.y),m=new THREE.Mesh(new THREE.PlaneGeometry(34,136),bm);m.position.set(p.x,128,p.y);m.rotation.y=Math.atan2(nx,nz);scene.add(m);});
+ // chuyển động: chùm đèn quét + khán giả nhún nhảy
+ const OM=new THREE.Object3D();
+ (function outLoop(ms){const t=ms/1000;
+   for(const b of SKY){b.m.rotation.z=Math.sin(t*.45+b.ph)*.42;b.m.rotation.x=-.12+Math.cos(t*.33+b.ph)*.18;}
+   for(let i=0;i<ON;i++){const o=OUT[i],j=Math.abs(Math.sin(t*o.sp+o.ph))*5,sw=Math.sin(t*o.sp*.5+o.ph)*.35;
+     OM.position.set(o.x,9+j,o.z);OM.rotation.set(0,o.ry+sw*.4,sw*.15);OM.scale.set(1,1,1);OM.updateMatrix();oBody.setMatrixAt(i,OM.matrix);
+     OM.position.y=22+j;OM.updateMatrix();oHead.setMatrixAt(i,OM.matrix);
+     OM.position.set(o.x+Math.cos(o.ry)*6,32+j+Math.abs(Math.sin(t*o.sp+o.ph))*4,o.z-Math.sin(o.ry)*6);OM.updateMatrix();oStick.setMatrixAt(i,OM.matrix);}
+   oBody.instanceMatrix.needsUpdate=oHead.instanceMatrix.needsUpdate=oStick.instanceMatrix.needsUpdate=true;requestAnimationFrame(outLoop);})(performance.now());
+}
+
 // nội thất kiểu Mỹ Đình: đường chạy điền kinh có vạch làn, vòng LED quảng cáo quanh sân, dải phòng VIP giữa hai tầng khán đài A/B, bảng điện tử trên khán đài D
 {const lm=new THREE.LineBasicMaterial({color:0xf2f2f2,transparent:true,opacity:.55});
  for(let k=0;k<=8;k++){const r=443+k*7,pts=capShape(r).getPoints(60).map(p=>V(p.x,2.5,p.y));scene.add(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(pts),lm));}
