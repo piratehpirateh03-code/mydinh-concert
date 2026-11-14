@@ -1690,8 +1690,8 @@ function mirSync(){if(!ytId||ytBlocked)return;const n=performance.now(),play=S.y
     if(!play||YT.cur<=0||!m.curAt)continue;
     if(m.sk&&n-m.sk<1600)continue;
     const d=m.cur+Math.min(1.5,(n-m.curAt)/1000)-main;m.d=d;
-    if(m.sk&&!m.cal){m.cal=1;if(Math.abs(d)<2)m.lat=Math.max(0,Math.min(1.2,(m.lat==null?.2:m.lat)-d*.7));}
-    if(Math.abs(d)>.15&&n-(m.sk||0)>(Math.abs(d)>1?1600:3000)){m.sk=n;m.cal=0;ytCmd('seekTo',[main+(m.lat==null?.2:m.lat),true],m);}}}
+    if(m.sk&&!m.cal){m.cal=1;if(Math.abs(d)<2)m.lat=Math.max(-1,Math.min(1.2,(m.lat==null?.2:m.lat)-d*.7));if(Math.abs(d)<.4)m.ns=(m.ns||0)+1;else m.ns=0;}
+    if(Math.abs(d)>.15&&n-(m.sk||0)>(Math.abs(d)>1?1600:(m.ns>=4?15000:3000))){m.sk=n;m.cal=0;ytCmd('seekTo',[main+(m.lat==null?.2:m.lat),true],m);}}}
 setInterval(mirSync,250);
 function clearYT(){YT.muted=false;$('vUnmute').hidden=true;SY.ytFollow=null;SY.anchor=null;if(!hasLocal)$('vbar').hidden=true;YT.dur=YT.cur=0;S.ytState=null;scr.querySelector('iframe')?.remove();dropMirrors();ytId=null;ytBlocked=false;scr.classList.remove('live');$('ytOpen').classList.remove('on');}
 // video / nhạc từ máy: chiếu thẳng lên màn LED bằng texture, đèn chạy theo âm thanh thật
