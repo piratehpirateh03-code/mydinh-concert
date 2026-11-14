@@ -594,7 +594,7 @@ body.guest #menuBtn{margin-left:auto}
   </div></details>
   <details open id="plSec"><summary>👥 Người trong phòng <em id="plCnt">1</em></summary><div class="dbody"><div id="memList"></div><div class="opt2">Chủ phòng bấm "Trao quyền" để nhường quyền điều khiển nhạc, hiệu ứng và khán giả cho người khác.</div></div></details>
   <details id="tkSec"><summary>🎟 Giành vé Ultimate</summary><div class="dbody">
-  <div class="tkown" id="tkOwn" hidden>🎫 Bạn đã sở hữu Vé Vàng Ultimate · mã <b id="tkMyCode"></b></div>
+  <div class="tkown" id="tkOwn" hidden>🎫 Bạn đã sở hữu Vé Vàng Ultimate · mã <b id="tkMyCode"></b> · hết hạn sau <b id="tkUltLeft"></b> (vé chỉ có hiệu lực 1 tiếng, hết hạn phải giành lại)</div>
   <div class="opt2">Phiên bán vé mô phỏng tự mở đúng mỗi giờ theo giờ thật (09:00, 10:00, 11:00…). Chỉ 20 vé Ultimate, khoảng 10.000 tài khoản ảo, trong đó rất nhiều tài khoản dùng tool săn vé, cùng mọi người chơi thật tranh nhau. Mỗi người chỉ được săn 1 lần mỗi giờ. Về đích trong top 20 sẽ nhận vé vàng, có logo nổi bật ở mọi phòng.</div>
   <div class="opt2" id="tkSt">Đang tính giờ mở bán…</div>
   </div></details>
@@ -1849,7 +1849,7 @@ function tkBots(){const r=tkRng(TK.sd||1),a=new Float32Array(TKN),g=()=>Math.sqr
 const tkReal=v=>{let n=0;for(const t of TK.rt)if(t<v)n++;return n;},tkCnt=v=>tkLB(TK.bots,v)+tkReal(v);
 function tkKth(k){const all=Array.from(TK.bots.subarray(0,k+2)).concat(TK.rt).sort((a,b)=>a-b);return all[Math.min(k,all.length)-1];}
 function tkLoad(){try{const o=JSON.parse(localStorage.getItem('mdsim.tk')||'null');if(o&&Number.isFinite(o.at)){TK.at=o.at;if(TKLV[o.lv])TK.lv=o.lv;TK.sd=o.sd>>>0;}}catch(e){}
-  try{const u=JSON.parse(localStorage.getItem('mdsim.ult')||'null');if(u&&typeof u.c==='string'&&/^ULT-[A-Z0-9]{6}$/.test(u.c))S.ult=u;}catch(e){}}
+  try{const u=JSON.parse(localStorage.getItem('mdsim.ult')||'null');if(u&&typeof u.c==='string'&&/^ULT-[A-Z0-9]{6}$/.test(u.c)&&Number.isFinite(u.t)&&Date.now()-u.t<TKHR&&Date.now()>=u.t-60000)S.ult=u;else if(u)localStorage.removeItem('mdsim.ult');}catch(e){}}
 function tkSave(){if(TK.rem)return;try{if(TK.at)localStorage.setItem('mdsim.tk',JSON.stringify({at:TK.at,lv:TK.lv,sd:TK.sd}));else localStorage.removeItem('mdsim.tk');}catch(e){}}
 const TKb=$('tkBody');
 function tkView(st,html){TK.st=st;TKb.innerHTML=html;$('tkHud').hidden=!(st==='cat'||st==='cap'||st==='pay'||st==='proc');$('tkFeed').style.display=$('tkHud').hidden?'none':'';}
@@ -1899,7 +1899,9 @@ function tkOwn(){const u=S.ult;$('ultChip').hidden=!u;$('tkOwn').hidden=!u;if(u)
 const fmtHr=ms=>{const d=new Date(ms);return pad2(d.getHours())+':'+pad2(d.getMinutes());};
 // phiên tự động: đúng mỗi giờ; hạt giống lấy từ mốc giờ nên mọi phòng, mọi máy cùng một cuộc đua
 function tkSlot(now){const b=Math.floor(now/TKHR)*TKHR;return now<b+60000?b:b+TKHR;}
-function tkTick(){const now=NOW(),chip=$('tkChip'),st=$('tkSt');
+function ultChk(){const u=S.ult;if(!u)return;const left=TKHR-(Date.now()-u.t);if(left<=0||left>TKHR+60000){S.ult=null;try{localStorage.removeItem('mdsim.ult');}catch(e){}setNick(S.nick);tkOwn();forceNet=true;addLine('','🎫 Vé Vàng Ultimate của bạn đã hết hạn (chỉ có hiệu lực 1 tiếng). Muốn có vé, hãy giành lại ở phiên bán tiếp theo.',null,{sys:true});}
+  else{const m=Math.floor(left/60000),sc=Math.floor(left%60000/1000);const e=$('tkUltLeft');if(e)e.textContent=pad2(m)+':'+pad2(sc);}}
+function tkTick(){ultChk();const now=NOW(),chip=$('tkChip'),st=$('tkSt');
   if(!TK.on){const sl=tkSlot(now);if(TK.at!==sl){TK.at=sl;TK.lv='hard';TK.sd=(Math.imul((sl/TKHR)|0,2654435761)>>>0)||1;TK.auto=false;}}
   {const q=tkQuota(TK.at);st.textContent=TK.at>now?`Phiên tiếp theo mở bán lúc ${fmtHr(TK.at)} (còn ${fmtCd(TK.at-now)}). Phòng chờ tự mở trước 45 giây.`+(q.ok?'':' Bạn đã săn phiên này rồi.'):`Phiên ${fmtHr(TK.at)} đang mở bán.`;}
   chip.hidden=!(TK.at>now&&!TK.on);if(!chip.hidden)chip.textContent='🎟 Vé Ultimate · '+fmtCd(TK.at-now);bTkUpd(now);
